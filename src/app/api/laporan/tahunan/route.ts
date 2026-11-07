@@ -11,7 +11,10 @@ export async function GET(req: NextRequest) {
   seedDatabase();
   const db = getDb();
   const { searchParams } = new URL(req.url);
-  const tahun = searchParams.get("tahun") ?? "2026";
+  const tahunParam = searchParams.get("tahun");
+  const tahun = tahunParam && /^\d{4}$/.test(tahunParam)
+    ? tahunParam
+    : String(new Date().getFullYear());
 
   const bulanList = [
     "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",

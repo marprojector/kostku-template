@@ -13,13 +13,24 @@ import { LaporanTahunanPage } from "@/components/pages/LaporanTahunan";
 import { PengaturanPage } from "@/components/pages/Pengaturan";
 import { PenyewaDetail } from "@/components/pages/PenyewaDetail";
 import { useTheme } from "@/lib/useTheme";
+import { BULAN_ID, HARI_ID } from "@/lib/format";
 
 export function Shell() {
   const [page, setPage] = useState<PageId>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedPenyewaId, setSelectedPenyewaId] = useState<number | null>(null);
   const { theme, toggle, mounted } = useTheme();
-  const tanggal = "Jumat, 6 November 2026";
+  const [tanggal, setTanggal] = useState("");
+
+  useEffect(() => {
+    function update() {
+      const d = new Date();
+      setTanggal(HARI_ID[d.getDay()] + ", " + d.getDate() + " " + BULAN_ID[d.getMonth()] + " " + d.getFullYear());
+    }
+    update();
+    const timer = setInterval(update, 60_000);
+    return () => clearInterval(timer);
+  }, []);
 
   function handleSelectPenyewa(id: number) {
     setSelectedPenyewaId(id);

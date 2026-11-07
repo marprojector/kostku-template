@@ -11,7 +11,10 @@ export async function GET(req: NextRequest) {
   seedDatabase();
   const db = getDb();
   const { searchParams } = new URL(req.url);
-  const periode = searchParams.get("periode") ?? "2026-11";
+  const periodeParam = searchParams.get("periode");
+  const periode = periodeParam && /^\d{4}-\d{2}$/.test(periodeParam)
+    ? periodeParam
+    : new Date().toLocaleDateString("sv-SE").slice(0, 7);
   const [tahun, bulan] = periode.split("-");
 
   // Pendapatan

@@ -29,7 +29,8 @@ export function Tunggakan() {
   const totalLewat = lewat.reduce((s, t) => s + t.nominal, 0);
 
   // Kontrak yang jatuh tempo bulan ini
-  const bulanIni = new Date().toISOString().slice(0, 7);
+  const d = new Date();
+  const bulanIni = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
   const kontrakHabisBulanIni = (kontrak.data ?? []).filter((k) =>
     k.tanggalJatuhTempo.startsWith(bulanIni)
   );

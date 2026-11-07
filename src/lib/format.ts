@@ -51,12 +51,12 @@ export function waLink(noWa: string, pesan: string): string {
   return `https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`;
 }
 
-/** ISO date (YYYY-MM-DD) untuk input[type=date] */
+/** ISO date (YYYY-MM-DD) timezone lokal — bukan UTC */
 export function isoDate(d: Date = new Date()): string {
-  return d.toISOString().slice(0, 10);
+  return d.toLocaleDateString("sv-SE");
 }
 
-/** YYYY-MM untuk periode */
+/** YYYY-MM timezone lokal */
 export function isoPeriode(d: Date = new Date()): string {
-  return d.toISOString().slice(0, 7);
+  return d.toLocaleDateString("sv-SE").slice(0, 7);
 }

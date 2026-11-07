@@ -15,14 +15,14 @@ let cachedTanggal: string | null = null;
 
 function getBulanSnapshot(): string {
   if (cachedBulan === null) {
-    cachedBulan = new Date().toISOString().slice(0, 7);
+    cachedBulan = new Date().toLocaleDateString("sv-SE").slice(0, 7);
   }
   return cachedBulan;
 }
 
 function getTanggalSnapshot(): string {
   if (cachedTanggal === null) {
-    cachedTanggal = new Date().toISOString().slice(0, 10);
+    cachedTanggal = new Date().toLocaleDateString("sv-SE");
   }
   return cachedTanggal;
 }

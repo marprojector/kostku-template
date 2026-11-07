@@ -12,7 +12,10 @@ export async function GET(req: NextRequest) {
   seedDatabase();
   const db = getDb();
   const { searchParams } = new URL(req.url);
-  const now = searchParams.get("tanggal") ?? "2026-11-06";
+  const tanggalParam = searchParams.get("tanggal");
+  const now = tanggalParam && /^\d{4}-\d{2}-\d{2}$/.test(tanggalParam)
+    ? tanggalParam
+    : new Date().toLocaleDateString("sv-SE"); // YYYY-MM-DD di timezone server
 
   // Peta kamar: semua kamar + penyewa aktif untuk grid visual
   const kamarRows = db.prepare(`
@@ -87,9 +90,9 @@ export async function GET(req: NextRequest) {
   for (const row of kategoriRows) perKategori[row.kategori] = row.total;
 
   // Bulan lalu untuk perbandingan
-  const bl = new Date(now);
-  bl.setMonth(bl.getMonth() - 1);
-  const bulanLalu = bl.toISOString().slice(0, 7);
+  const [nowTahun, nowBulan] = now.split("-").map(Number);
+  const bl = new Date(Number(nowTahun), Number(nowBulan) - 2, 1);
+  const bulanLalu = `${bl.getFullYear()}-${String(bl.getMonth() + 1).padStart(2, "0")}`;
   const pdpBulanLalu = db.prepare(`
     SELECT COALESCE(SUM(nominal), 0) as total FROM transaksi
     WHERE tipe = 'pemasukan' AND tanggal LIKE ?

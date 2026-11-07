@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   // Hitung jatuh tempo = tanggal masuk + 1 bulan
   const masuk = new Date(tanggalMasuk);
   masuk.setMonth(masuk.getMonth() + 1);
-  const jatuhTempo = masuk.toISOString().slice(0, 10);
+  const jatuhTempo = masuk.toLocaleDateString("sv-SE");
 
   const insertAll = db.transaction(() => {
     // Tambah penyewa
