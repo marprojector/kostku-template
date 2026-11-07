@@ -4,17 +4,24 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run typecheck && next build",
     "start": "next start",
-    "lint": "eslint"
+    "start:prod": "npm run build && npm run start",
+    "rebuild-native": "npm rebuild better-sqlite3",
+    "backup": "node scripts/backup-db.cjs",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "jose": "^6.2.15",
     "next": "16.4.5",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

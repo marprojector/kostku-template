@@ -17,9 +17,15 @@
 /.next/
 /out/
 
-# production
-/build
-
+# production runtime data
+/backups/
+/data/
+/deploy/.env*
+/.env.production
+/docker-compose.override.yml
+/kostku.db
+/kostku.db-shm
+/kostku.db-wal
 # misc
 .DS_Store
 *.pem

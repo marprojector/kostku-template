@@ -1,26 +1,454 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Fonts: Plus Jakarta Sans (display) + Inter (body) + JetBrains Mono (code) */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap");
+
+/* =========================================================
+   DESIGN TOKENS — "Editorial Indigo"
+   Deep indigo brand, warm paper light theme, true-black dark
+   ========================================================= */
+:root,
+[data-theme="light"] {
+  --bg: #eef0f6;
+  --bg-grain: rgba(79, 70, 229, 0.035);
+  --sheet: #fcfcfd;
+  --card-bg: #ffffff;
+  --surface-2: #f2f3f7;
+  --surface-3: #e9ebf2;
+
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-soft: #eef2ff;
+  --primary-ring: rgba(79, 70, 229, 0.16);
+
+  --success: #0e9f6e;
+  --success-bg: #e3f7ef;
+  --warning: #c27803;
+  --warning-bg: #fdf3d7;
+  --danger: #e02424;
+  --danger-bg: #fde8e8;
+  --info: #1c64f2;
+  --info-bg: #e1effe;
+
+  --border: #e4e7ee;
+  --border-strong: #cfd5e2;
+  --text: #191d28;
+  --text-muted: #5d6577;
+  --text-faint: #9aa2b5;
+
+  --shadow-card: 0 1px 2px rgba(23, 27, 36, 0.05), 0 1px 3px rgba(23, 27, 36, 0.04);
+  --shadow-pop: 0 12px 32px -8px rgba(23, 27, 36, 0.18), 0 2px 6px rgba(23, 27, 36, 0.08);
+  --shadow-kpi: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+  --sidebar-w: 248px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+[data-theme="dark"] {
+  --bg: #08090d;
+  --bg-grain: rgba(124, 131, 255, 0.045);
+  --sheet: #101218;
+  --card-bg: #15171e;
+  --surface-2: #1c1f28;
+  --surface-3: #262a36;
+
+  --primary: #818cf8;
+  --primary-hover: #a5b0ff;
+  --primary-soft: #1e2242;
+  --primary-ring: rgba(129, 140, 248, 0.22);
+
+  --success: #34d399;
+  --success-bg: #0c2f22;
+  --warning: #fbbf24;
+  --warning-bg: #33270a;
+  --danger: #f87171;
+  --danger-bg: #3a1518;
+  --info: #60a5fa;
+  --info-bg: #12233f;
+
+  --border: #232733;
+  --border-strong: #313848;
+  --text: #e9ebf3;
+  --text-muted: #949db3;
+  --text-faint: #5d6679;
+
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-pop: 0 16px 40px -12px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-kpi: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(1100px 460px at 82% -140px, var(--bg-grain), transparent 62%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ---------- Focus ---------- */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ---------- Inputs ---------- */
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 13px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+  width: 100%;
+}
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--border-strong);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-ring);
+}
+input::placeholder {
+  color: var(--text-faint);
+}
+
+/* ---------- Buttons ---------- */
+button {
+  font-family: inherit;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease,
+    transform 100ms ease;
+}
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ---------- Tables: editorial rules, generous rows ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th {
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--border-strong);
+  padding: 12px 16px;
+  white-space: nowrap;
+}
+td {
+  padding: 14px 16px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+}
+tbody tr:last-child td {
+  border-bottom: none;
+}
+tbody tr {
+  transition: background-color 120ms ease;
+}
+tbody tr:hover {
+  background: color-mix(in srgb, var(--primary) 3%, transparent);
+}
+
+/* ---------- Layout: frame + inset sheet ---------- */
+.kostku-main {
+  margin-left: var(--sidebar-w);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.kostku-sheet {
+  flex: 1;
+  width: calc(100% - 24px);
+  max-width: 1280px;
+  margin: 12px auto 16px;
+  background: var(--sheet);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 32px 36px 56px;
+  min-height: calc(100vh - 12px - 58px - 16px);
+}
+
+/* ---------- Sidebar brand ---------- */
+.kostku-brandmark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 55%, #0ea5e9));
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  box-shadow: 0 4px 12px -2px var(--primary-ring);
+  flex-shrink: 0;
+}
+.kostku-navitem {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 11px;
+  margin-bottom: 2px;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13.5px;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.kostku-navitem:hover {
+  background: var(--surface-2);
+}
+.kostku-navitem[aria-current="page"] {
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 600;
+}
+.kostku-navitem[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 3px;
+  background: var(--primary);
+}
+
+/* ---------- Room map (signature element) ---------- */
+.room-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 9px;
+}
+.room-cell {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 11px 10px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  background: var(--card-bg);
+  cursor: pointer;
+  transition: border-color 130ms ease, background-color 130ms ease, transform 130ms ease, box-shadow 130ms ease;
+  font-family: inherit;
+  text-align: left;
+}
+.room-cell:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-card);
+}
+.room-cell[data-status="terisi"] {
+  background: linear-gradient(160deg, var(--primary-soft), color-mix(in srgb, var(--primary) 14%, var(--card-bg)));
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
+}
+.room-cell[data-status="terisi"]::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-ring);
+}
+.room-cell[data-selected="true"] {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ---------- Segmented control ---------- */
+.segmented {
+  display: inline-flex;
+  background: var(--surface-2);
+  border-radius: 11px;
+  padding: 3px;
+  gap: 2px;
+}
+.segmented button {
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.segmented button[data-active="true"] {
+  background: var(--card-bg);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), var(--shadow-kpi);
+}
+
+/* ---------- Cash flow bars ---------- */
+.cashbar {
+  transition: height 350ms cubic-bezier(0.2, 0, 0, 1), opacity 120ms ease;
+}
+.cashbar:hover {
+  opacity: 0.82;
+}
+
+@media (max-width: 900px) {
+  .kostku-sidebar {
+    transform: translateX(-100%);
+    transition: transform 220ms cubic-bezier(0.2, 0, 0, 1);
+  }
+  .kostku-sidebar[data-open="true"] {
+    transform: translateX(0);
+  }
+  .kostku-main {
+    margin-left: 0;
+  }
+  .kostku-menu-btn {
+    display: inline-flex !important;
+  }
+  .grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  .kostku-sheet {
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    padding: 20px 16px 40px;
+    min-height: calc(100vh - 58px);
+  }
+  .kostku-brandmark {
+    width: 30px;
+    height: 30px;
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 901px) {
+  .kostku-overlay {
+    display: none;
+  }
+}
+
+/* ---------- Motion ---------- */
+@keyframes kostku-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes kostku-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes kostku-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kostku-rise > * {
+  animation: kostku-rise 320ms cubic-bezier(0.2, 0, 0, 1) both;
+}
+.kostku-rise > *:nth-child(2) { animation-delay: 40ms; }
+.kostku-rise > *:nth-child(3) { animation-delay: 80ms; }
+.kostku-rise > *:nth-child(4) { animation-delay: 120ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

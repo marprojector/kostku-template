@@ -1,0 +1,26 @@
+[Unit]
+Description=KostKu production application
+After=network.target
+
+[Service]
+Type=simple
+User=kostku
+Group=kostku
+WorkingDirectory=/opt/kostku
+EnvironmentFile=/opt/kostku/.env.production
+Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=KOSTKU_DB_PATH=/var/lib/kostku/kostku.db
+Environment=KOSTKU_BACKUP_DIR=/var/backups/kostku
+ExecStart=/usr/bin/node /opt/kostku/.next/standalone/server.js
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/kostku /var/backups/kostku
+
+[Install]
+WantedBy=multi-user.target

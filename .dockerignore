@@ -1,0 +1,14 @@
+node_modules
+.next
+backups
+data
+*.db
+*.db-shm
+*.db-wal
+.env*
+!.env.example
+!.env.production.example
+.git
+.gitignore
+README.md
+PRD.md

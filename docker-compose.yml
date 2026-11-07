@@ -1,0 +1,29 @@
+services:
+  kostku:
+    build: .
+    restart: unless-stopped
+    init: true
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file:
+      - .env.production
+    environment:
+      NODE_ENV: production
+      KOSTKU_DB_PATH: /app/data/kostku.db
+      KOSTKU_BACKUP_DIR: /app/backups
+      SEED_DATABASE: "false"
+    volumes:
+      - kostku-data:/app/data
+      - kostku-backups:/app/backups
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/auth/me').then(r => process.exit(r.status === 401 ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  kostku-data:
+  kostku-backups:
