@@ -27,8 +27,8 @@ export function seedDatabase() {
   );
 
   const insertAll = db.transaction(() => {
-    const iso = (s: string) => new Date(s).toISOString();
-    const now = iso("2026-01-01");
+    const iso = (s: string) => s; // date-only string, konsisten dengan kolom DATE SQLite
+    const now = "2026-01-01";
 
     // 21 kamar
     const kamarIds: number[] = [];
