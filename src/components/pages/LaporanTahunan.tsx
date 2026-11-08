@@ -142,7 +142,7 @@ export function LaporanTahunanPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.months.map((m) => {
+                  {[...data.months].reverse().map((m) => {
                     const arus = m.pendapatan - m.pengeluaran;
                     return (
                       <tr key={m.short}>

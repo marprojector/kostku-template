@@ -22,18 +22,20 @@ function RoomMap({
   const [selected, setSelected] = useState<number | null>(null);
   const sel = rooms.find((r) => r.id === selected) ?? null;
 
-  const nunggak = rooms.filter((r) => r.status === "terisi" && r.tagihanStatus === "belum_lunas").length;
+  const nunggak = rooms.filter((r) => r.status === "terisi" && r.tagihanStatus === "telat").length;
+  const belumTempo = rooms.filter((r) => r.status === "terisi" && r.tagihanStatus === "belum_lunas").length;
   const aman = rooms.filter((r) => r.status === "terisi" && r.tagihanStatus === "lunas").length;
   const kosong = rooms.filter((r) => r.status === "tersedia").length;
 
   return (
     <Card>
-      <SectionTitle sub={`${aman + nunggak} terisi · ${kosong} kosong`}>Peta Kamar</SectionTitle>
+      <SectionTitle sub={`${aman + nunggak + belumTempo} terisi · ${kosong} kosong`}>Peta Kamar</SectionTitle>
 
-      {/* Ring status: kehilangan uang = merah, aman = hijau, peluang = abu */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+      {/* Ring status: telat = merah (hilang uang), belum jatuh tempo = kuning, lunas = hijau, kosong = abu */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
         {[
           { label: `${nunggak} nunggak`, count: nunggak, bg: "var(--danger-bg)", color: "var(--danger)" },
+          { label: `${belumTempo} belum tempo`, count: belumTempo, bg: "var(--warning-bg)", color: "var(--warning)" },
           { label: `${aman} lunas`, count: aman, bg: "var(--success-bg)", color: "var(--success)" },
           { label: `${kosong} kosong`, count: kosong, bg: "var(--surface-2)", color: "var(--text-muted)" },
         ].map((chip) => (
@@ -55,19 +57,21 @@ function RoomMap({
 
       <div className="room-grid" role="list" aria-label="Peta status kamar">
         {rooms.map((r) => {
-          const nunggakBulan = r.status === "terisi" && r.tagihanStatus === "belum_lunas";
+          const telat = r.status === "terisi" && r.tagihanStatus === "telat";
+          const belum = r.status === "terisi" && r.tagihanStatus === "belum_lunas";
+          const labelStatus = telat ? "nunggak (lewat jatuh tempo)" : belum ? "belum lunas" : "lunas";
           return (
             <button
               key={r.id}
               role="listitem"
               className="room-cell"
               data-status={r.status}
-              data-tagihan={nunggakBulan ? "belum" : r.status === "terisi" ? "lunas" : undefined}
+              data-tagihan={telat ? "telat" : belum ? "belum" : r.status === "terisi" ? "lunas" : undefined}
               data-selected={selected === r.id}
               onClick={() => setSelected(selected === r.id ? null : r.id)}
               aria-label={
                 r.status === "terisi"
-                  ? `${r.nomor} dihuni ${r.penyewa ?? ""}, tagihan ${nunggakBulan ? "belum lunas" : "lunas"}`
+                  ? `${r.nomor} dihuni ${r.penyewa ?? ""}, tagihan ${labelStatus}`
                   : `${r.nomor} tersedia, ${formatRupiah(r.harga)}/bulan`
               }
             >
@@ -107,16 +111,20 @@ function RoomMap({
                         ? "var(--surface-3)"
                         : sel.tagihanStatus === "lunas"
                           ? "var(--success-bg)"
-                          : "var(--danger-bg)",
+                          : sel.tagihanStatus === "telat"
+                            ? "var(--danger-bg)"
+                            : "var(--warning-bg)",
                     color:
                       sel.status !== "terisi"
                         ? "var(--text-muted)"
                         : sel.tagihanStatus === "lunas"
                           ? "var(--success)"
-                          : "var(--danger)",
+                          : sel.tagihanStatus === "telat"
+                            ? "var(--danger)"
+                            : "var(--warning)",
                   }}
                 >
-                  {sel.status !== "terisi" ? "Tersedia" : sel.tagihanStatus === "lunas" ? "Lunas" : "Belum Bayar"}
+                  {sel.status !== "terisi" ? "Tersedia" : sel.tagihanStatus === "lunas" ? "Lunas" : sel.tagihanStatus === "telat" ? "Nunggak" : "Belum Bayar"}
                 </span>
               </div>
               <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
@@ -150,7 +158,7 @@ function RoomMap({
 
           {sel.status === "terisi" && (
             <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-              {sel.tagihanStatus === "belum_lunas" && onBayar && (
+              {(sel.tagihanStatus === "telat" || sel.tagihanStatus === "belum_lunas") && onBayar && (
                 <Button size="sm" variant="primary" onClick={() => sel.tagihanId && onBayar(sel.tagihanId)} disabled={busy === sel.tagihanId}>
                   {busy === sel.id ? "Memproses…" : "Tandai Lunas"}
                 </Button>

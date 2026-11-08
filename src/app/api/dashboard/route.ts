@@ -17,10 +17,16 @@ export async function GET(req: NextRequest) {
     ? tanggalParam
     : new Date().toLocaleDateString("sv-SE"); // YYYY-MM-DD di timezone server
 
-  // Peta kamar: semua kamar + penyewa aktif + status tagihan periode berjalan
+  // Peta kamar: semua kamar + penyewa aktif + status tagihan.
+  // Prioritas: tagihan TELAT (belum lunas & lewat jatuh tempo, periode apapun)
+  // menang di atas status periode berjalan — sinkron dengan halaman Tunggakan.
   const bulan = now.slice(0, 7);
   const kamarRows = db.prepare(`
     SELECT k.id, k.nomor, k.status, k.harga_sewa, p.nama as penyewa, p.id as penyewa_id,
+           (SELECT t.id FROM tagihan t
+            JOIN kontrak_sewa ks2 ON ks2.id = t.kontrak_id
+            WHERE ks2.kamar_id = k.id AND t.status = 'belum_lunas' AND t.jatuh_tempo <= ?
+            ORDER BY t.jatuh_tempo ASC LIMIT 1) as telat_id,
            (SELECT t.id FROM tagihan t
             JOIN kontrak_sewa ks2 ON ks2.id = t.kontrak_id
             WHERE ks2.kamar_id = k.id AND t.periode = ?
@@ -33,7 +39,7 @@ export async function GET(req: NextRequest) {
     LEFT JOIN kontrak_sewa ks ON ks.kamar_id = k.id AND ks.status = 'aktif'
     LEFT JOIN penyewa p ON p.id = ks.penyewa_id
     ORDER BY CAST(SUBSTR(k.nomor, 7) AS INTEGER)
-  `).all(bulan, bulan) as Array<{ id: number; nomor: string; status: string; harga_sewa: number; penyewa: string | null; penyewa_id: number | null; tagihan_id: number | null; tagihan_status: string | null }>;
+  `).all(now, bulan, bulan) as Array<{ id: number; nomor: string; status: string; harga_sewa: number; penyewa: string | null; penyewa_id: number | null; telat_id: number | null; tagihan_id: number | null; tagihan_status: string | null }>;
   const totalKamar = db.prepare("SELECT COUNT(*) as c FROM kamar").get() as { c: number };
   const kamarTerisi = db.prepare("SELECT COUNT(*) as c FROM kamar WHERE status = 'terisi'").get() as { c: number };
 
@@ -135,16 +141,21 @@ export async function GET(req: NextRequest) {
       tersedia: totalKamar.c - kamarTerisi.c,
       persen: Math.round((kamarTerisi.c / totalKamar.c) * 100),
     },
-    kamar: kamarRows.map((r) => ({
-      id: r.id,
-      nomor: r.nomor,
-      status: r.status,
-      penyewa: r.penyewa,
-      penyewaId: r.penyewa_id,
-      harga: r.harga_sewa,
-      tagihanStatus: r.tagihan_status,
-      tagihanId: r.tagihan_id,
-    })),
+    kamar: kamarRows.map((r) => {
+      // Tagihan telat (apapun periode) menang — sinkron dengan halaman Tunggakan
+      const tagihanStatus = r.telat_id !== null ? "telat" : r.tagihan_status;
+      const tagihanId = r.telat_id ?? (r.tagihan_status === "belum_lunas" ? r.tagihan_id : null);
+      return {
+        id: r.id,
+        nomor: r.nomor,
+        status: r.status,
+        penyewa: r.penyewa,
+        penyewaId: r.penyewa_id,
+        harga: r.harga_sewa,
+        tagihanStatus,
+        tagihanId,
+      };
+    }),
     tagihan: {
       belumLunas: totalTagihan.total,
       totalBelumLunas: belumLunas.c,

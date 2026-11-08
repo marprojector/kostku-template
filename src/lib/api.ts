@@ -16,7 +16,7 @@ export interface RoomRow {
 
 export interface DashboardStats {
   okupansi: { total: number; terisi: number; tersedia: number; persen: number };
-  kamar: Array<{ id: number; nomor: string; status: string; penyewa: string | null; penyewaId: number | null; harga: number; tagihanStatus: string | null; tagihanId: number | null }>;
+  kamar: Array<{ id: number; nomor: string; status: string; penyewa: string | null; penyewaId: number | null; harga: number; tagihanStatus: "telat" | "belum_lunas" | "lunas" | null; tagihanId: number | null }>;
   tagihan: { belumLunas: number; totalBelumLunas: number };
   jatuhTempo: TagihanDetail[];
   lewat: TagihanDetail[];
