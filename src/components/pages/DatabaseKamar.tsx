@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/ui";
-import { fetchKamar, formatRupiah, waLink, type RoomRow } from "@/lib/api";
+import { fetchKamar, formatRupiah, waLink, createKamar, updateKamar, type RoomRow } from "@/lib/api";
 import { tanggalPendek } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 
@@ -15,11 +15,69 @@ interface Props {
 }
 
 export function DatabaseKamar({ onSelectPenyewa }: Props) {
-  const { data, loading, error } = useApi<RoomRow[]>(() => fetchKamar());
+  const { data, loading, error, reload } = useApi<RoomRow[]>(() => fetchKamar());
   const [filter, setFilter] = useState<Filter>("semua");
   const [q, setQ] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editNomor, setEditNomor] = useState("");
+  const [editHarga, setEditHarga] = useState("");
+  const [editErr, setEditErr] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
+  const [addNomor, setAddNomor] = useState("");
+  const [addHarga, setAddHarga] = useState("");
+  const [addErr, setAddErr] = useState<string | null>(null);
 
   const rows = data ?? EMPTY_ROWS;
+
+  function mulaiEdit(r: RoomRow) {
+    setEditingId(r.kamar.id);
+    setEditNomor(r.kamar.nomor);
+    setEditHarga(String(r.kamar.hargaSewa));
+    setEditErr(null);
+  }
+
+  async function simpanEdit() {
+    if (editingId === null) return;
+    const harga = Number(editHarga);
+    if (!editNomor.trim() || !Number.isSafeInteger(harga) || harga <= 0) {
+      setEditErr("Nomor dan harga (angka > 0) wajib benar.");
+      return;
+    }
+    setSaving(true);
+    setEditErr(null);
+    try {
+      await updateKamar(editingId, { nomor: editNomor.trim(), hargaSewa: harga });
+      setEditingId(null);
+      reload();
+    } catch (err) {
+      setEditErr(err instanceof Error ? err.message : "Gagal menyimpan");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function simpanTambah() {
+    const harga = Number(addHarga);
+    if (!addNomor.trim() || !Number.isSafeInteger(harga) || harga <= 0) {
+      setAddErr("Nomor dan harga (angka > 0) wajib benar.");
+      return;
+    }
+    setSaving(true);
+    setAddErr(null);
+    try {
+      await createKamar({ nomor: addNomor.trim(), hargaSewa: harga });
+      setShowAdd(false);
+      setAddNomor("");
+      setAddHarga("");
+      reload();
+    } catch (err) {
+      setAddErr(err instanceof Error ? err.message : "Gagal menambah kamar");
+    } finally {
+      setSaving(false);
+    }
+  }
+
 
   const counts = useMemo(
     () => ({
@@ -76,7 +134,32 @@ export function DatabaseKamar({ onSelectPenyewa }: Props) {
           style={{ maxWidth: 260 }}
           aria-label="Cari kamar atau penyewa"
         />
+        <Button variant="primary" onClick={() => { setShowAdd((v) => !v); setAddErr(null); }}>
+          {showAdd ? "Batal" : "Tambah Kamar"}
+        </Button>
       </div>
+
+      {showAdd && (
+        <Card style={{ marginBottom: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto auto", gap: 10, alignItems: "end" }} className="grid-2">
+            <div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Nomor kamar</div>
+              <input value={addNomor} onChange={(e) => setAddNomor(e.target.value)} placeholder="Kamar 7" aria-label="Nomor kamar baru" />
+            </div>
+            <div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Harga sewa per bulan</div>
+              <input value={addHarga} onChange={(e) => setAddHarga(e.target.value)} placeholder="750000" inputMode="numeric" aria-label="Harga sewa kamar baru" />
+            </div>
+            <Button variant="primary" onClick={simpanTambah} disabled={saving}>
+              {saving ? "Menyimpan…" : "Simpan"}
+            </Button>
+            <Button variant="secondary" onClick={() => setShowAdd(false)}>Batal</Button>
+          </div>
+          {addErr && (
+            <div role="alert" style={{ marginTop: 10, color: "var(--danger)", fontSize: 13 }}>{addErr}</div>
+          )}
+        </Card>
+      )}
 
       <Card style={{ padding: 0, overflow: "hidden" }}>
         {loading ? (
@@ -109,7 +192,13 @@ export function DatabaseKamar({ onSelectPenyewa }: Props) {
               <tbody>
                 {filtered.map((r) => (
                   <tr key={r.kamar.id}>
-                    <td style={{ fontWeight: 600 }}>{r.kamar.nomor}</td>
+                    <td style={{ fontWeight: 600 }}>
+                      {editingId === r.kamar.id ? (
+                        <input value={editNomor} onChange={(e) => setEditNomor(e.target.value)} aria-label="Nomor kamar" style={{ width: 100 }} />
+                      ) : (
+                        r.kamar.nomor
+                      )}
+                    </td>
                     <td>
                       {r.penyewa ? (
                         <button
@@ -132,7 +221,11 @@ export function DatabaseKamar({ onSelectPenyewa }: Props) {
                       )}
                     </td>
                     <td className="tnum" style={{ textAlign: "right" }}>
-                      {formatRupiah(r.kamar.hargaSewa)}
+                      {editingId === r.kamar.id ? (
+                        <input value={editHarga} onChange={(e) => setEditHarga(e.target.value)} inputMode="numeric" aria-label="Harga sewa" style={{ width: 100, textAlign: "right" }} />
+                      ) : (
+                        formatRupiah(r.kamar.hargaSewa)
+                      )}
                     </td>
                     <td style={{ color: "var(--text-muted)" }}>
                       {r.kontrak?.tanggalJatuhTempo ? tanggalPendek(r.kontrak.tanggalJatuhTempo) : "—"}
@@ -143,20 +236,33 @@ export function DatabaseKamar({ onSelectPenyewa }: Props) {
                       </Badge>
                     </td>
                     <td style={{ textAlign: "right" }}>
-                      {r.penyewa && (
-                        <a
-                          href={waLink(
-                            r.penyewa.noWa,
-                            `Halo ${r.penyewa.nama}, kami dari pengelola Kos Perajin ingin mengingatkan sewa ${r.kamar.nomor}.`
-                          )}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ textDecoration: "none" }}
-                        >
-                          <Button size="sm" variant="success">
-                            WhatsApp
+                      {editingId === r.kamar.id ? (
+                        <span style={{ display: "inline-flex", gap: 6, alignItems: "center" }}>
+                          {editErr && <span style={{ color: "var(--danger)", fontSize: 12 }}>{editErr}</span>}
+                          <Button size="sm" variant="primary" onClick={simpanEdit} disabled={saving}>
+                            {saving ? "…" : "Simpan"}
                           </Button>
-                        </a>
+                          <Button size="sm" variant="secondary" onClick={() => setEditingId(null)}>Batal</Button>
+                        </span>
+                      ) : (
+                        <span style={{ display: "inline-flex", gap: 6 }}>
+                          <Button size="sm" variant="secondary" onClick={() => mulaiEdit(r)}>Edit</Button>
+                          {r.penyewa && (
+                            <a
+                              href={waLink(
+                                r.penyewa.noWa,
+                                `Halo ${r.penyewa.nama}, kami dari pengelola Kos Perajin ingin mengingatkan sewa ${r.kamar.nomor}.`
+                              )}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ textDecoration: "none" }}
+                            >
+                              <Button size="sm" variant="success">
+                                WhatsApp
+                              </Button>
+                            </a>
+                          )}
+                        </span>
                       )}
                     </td>
                   </tr>

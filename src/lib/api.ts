@@ -306,6 +306,45 @@ export async function bayarTagihan(id: number) {
   return json;
 }
 
+export async function createKamar(payload: { nomor: string; hargaSewa: number }): Promise<{ ok: boolean; id: number }> {
+  const res = await fetch("/api/kamar", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal menambah kamar");
+  return json;
+}
+
+export async function updateKamar(
+  id: number,
+  payload: { nomor?: string; hargaSewa?: number }
+): Promise<{ ok: boolean }> {
+  const res = await fetch(`/api/kamar/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal mengubah kamar");
+  return json;
+}
+
+export async function perpanjangKontrak(
+  id: number,
+  tambahHari: number
+): Promise<{ ok: boolean; kontrakId: number; jatuhTempoBaru: string }> {
+  const res = await fetch(`/api/kontrak/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tambahHari }),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal memperpanjang kontrak");
+  return json;
+}
+
 export async function logWhatsApp(payload: {
   penyewaId: number;
   pesan: string;

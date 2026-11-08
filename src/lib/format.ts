@@ -47,6 +47,13 @@ export function labelJatuhTempo(hari: number): string {
   return `Lewat ${Math.abs(hari)} hari`;
 }
 
+/** Normalisasi nomor WhatsApp: terima 08… atau 62…, hasil selalu 62… untuk wa.me */
+export function normalisasiWa(input: string): string {
+  const digits = input.replace(/\D/g, "");
+  if (digits.startsWith("0")) return "62" + digits.slice(1);
+  return digits;
+}
+
 export function waLink(noWa: string, pesan: string): string {
   return `https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`;
 }

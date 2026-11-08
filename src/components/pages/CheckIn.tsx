@@ -143,9 +143,9 @@ export function CheckIn() {
 
               <div style={fieldStyle}>
                 <label htmlFor="ci-wa" style={labelStyle}>Nomor WhatsApp</label>
-                <input id="ci-wa" value={noWa} onChange={(e) => setNoWa(e.target.value)} placeholder="628xxxxxxxxxx" inputMode="numeric" />
+                <input id="ci-wa" value={noWa} onChange={(e) => setNoWa(e.target.value)} placeholder="08xxxxxxxxxx" inputMode="numeric" />
                 <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 4 }}>
-                  Format internasional tanpa tanda +, dipakai untuk tombol kirim tagihan.
+                  Boleh format 08… atau 62… — otomatis dikonversi untuk tombol kirim tagihan.
                 </div>
               </div>
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { seedDatabase } from "@/lib/seed";
 import { requireJson, rateLimit, sanitizeId, sanitizeString } from "@/lib/security";
+import { normalisasiWa } from "@/lib/format";
 
 function formatRupiah(n: number) {
   return "Rp " + n.toLocaleString("id-ID");
@@ -25,7 +26,8 @@ export async function POST(req: NextRequest) {
 
   const input = body as { nama?: unknown; noWa?: unknown; kamarId?: unknown; nominal?: unknown; tanggalMasuk?: unknown; deposit?: unknown };
   const nama = sanitizeString(input.nama, 100);
-  const noWa = sanitizeString(input.noWa, 20);
+  const noWaRaw = sanitizeString(input.noWa, 20);
+  const noWa = noWaRaw ? normalisasiWa(noWaRaw) : "";
   const kamarId = sanitizeId(input.kamarId);
   const nominalRaw = typeof input.nominal === "number" ? input.nominal : NaN;
   const nominal = Number.isSafeInteger(nominalRaw) && nominalRaw > 0 ? nominalRaw : null;

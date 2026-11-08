@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { seedDatabase } from "@/lib/seed";
-import { rateLimit } from "@/lib/security";
+import { requireJson, rateLimit, sanitizeString } from "@/lib/security";
 
 // GET /api/kamar
 export async function GET(req: NextRequest) {
@@ -34,4 +34,38 @@ export async function GET(req: NextRequest) {
   }
 
   return NextResponse.json(rows);
+}
+
+// POST /api/kamar — tambah kamar baru
+export async function POST(req: NextRequest) {
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
+  const contentError = requireJson(req);
+  if (contentError) return contentError;
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "JSON tidak valid" }, { status: 400 });
+  }
+
+  const input = body as { nomor?: unknown; hargaSewa?: unknown };
+  const nomor = sanitizeString(input.nomor, 64);
+  const harga = input.hargaSewa;
+  if (!nomor) return NextResponse.json({ error: "Nomor kamar wajib diisi" }, { status: 400 });
+  if (typeof harga !== "number" || !Number.isSafeInteger(harga) || harga <= 0) {
+    return NextResponse.json({ error: "Harga sewa tidak valid" }, { status: 400 });
+  }
+
+  const db = getDb();
+  const exists = db.prepare("SELECT id FROM kamar WHERE nomor = ?").get(nomor);
+  if (exists) return NextResponse.json({ error: "Nomor kamar sudah digunakan" }, { status: 409 });
+
+  const result = db.prepare(
+    "INSERT INTO kamar (nomor, harga_sewa, status, created_at) VALUES (?, ?, 'tersedia', datetime('now'))"
+  ).run(nomor, harga);
+
+  return NextResponse.json({ ok: true, id: Number(result.lastInsertRowid) }, { status: 201 });
 }

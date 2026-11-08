@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/ui";
-import { fetchPenyewaProfil, formatRupiah, waLink, type PenyewaProfil } from "@/lib/api";
+import { fetchPenyewaProfil, formatRupiah, waLink, perpanjangKontrak, type PenyewaProfil } from "@/lib/api";
 import { selisihHari, tanggalPendek } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 
@@ -12,6 +13,30 @@ interface Props {
 
 export function PenyewaDetail({ penyewaId, onBack }: Props) {
   const { data, loading, error, reload } = useApi<PenyewaProfil>(() => fetchPenyewaProfil(penyewaId));
+  const [tambahHari, setTambahHari] = useState("30");
+  const [perpanjangErr, setPerpanjangErr] = useState<string | null>(null);
+  const [perpanjangOk, setPerpanjangOk] = useState<string | null>(null);
+  const [savingPerpanjang, setSavingPerpanjang] = useState(false);
+
+  async function handlePerpanjang(kontrakId: number) {
+    const hari = Number(tambahHari);
+    if (!Number.isSafeInteger(hari) || hari <= 0) {
+      setPerpanjangErr("Jumlah hari harus angka lebih dari 0.");
+      return;
+    }
+    setSavingPerpanjang(true);
+    setPerpanjangErr(null);
+    setPerpanjangOk(null);
+    try {
+      const res = await perpanjangKontrak(kontrakId, hari);
+      setPerpanjangOk(`Masa sewa diperpanjang ${hari} hari — jatuh tempo baru ${tanggalPendek(res.jatuhTempoBaru)}`);
+      reload();
+    } catch (err) {
+      setPerpanjangErr(err instanceof Error ? err.message : "Gagal memperpanjang kontrak");
+    } finally {
+      setSavingPerpanjang(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -159,6 +184,27 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
               })}
             </tbody>
           </table>
+        )}
+
+        {kontrakAktif && (
+          <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
+            <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Perpanjang Masa Sewa</div>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+              <input
+                value={tambahHari}
+                onChange={(e) => setTambahHari(e.target.value)}
+                inputMode="numeric"
+                aria-label="Tambah hari sewa"
+                style={{ width: 90 }}
+              />
+              <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>hari</span>
+              <Button size="sm" variant="primary" onClick={() => handlePerpanjang(kontrakAktif.id as number)} disabled={savingPerpanjang}>
+                {savingPerpanjang ? "Memproses…" : "Perpanjang"}
+              </Button>
+              {perpanjangOk && <span style={{ fontSize: 12.5, color: "var(--success)" }}>{perpanjangOk}</span>}
+              {perpanjangErr && <span role="alert" style={{ fontSize: 12.5, color: "var(--danger)" }}>{perpanjangErr}</span>}
+            </div>
+          </div>
         )}
       </Card>
 
