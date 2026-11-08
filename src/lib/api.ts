@@ -16,7 +16,7 @@ export interface RoomRow {
 
 export interface DashboardStats {
   okupansi: { total: number; terisi: number; tersedia: number; persen: number };
-  kamar: Array<{ id: number; nomor: string; status: string; penyewa: string | null; harga: number }>;
+  kamar: Array<{ id: number; nomor: string; status: string; penyewa: string | null; penyewaId: number | null; harga: number; tagihanStatus: string | null; tagihanId: number | null }>;
   tagihan: { belumLunas: number; totalBelumLunas: number };
   jatuhTempo: TagihanDetail[];
   lewat: TagihanDetail[];
@@ -300,7 +300,7 @@ export async function checkIn(payload: {
 }
 
 export async function bayarTagihan(id: number) {
-  const res = await fetch(`/api/tagihan/${id}/bayar`, { method: "PUT" });
+  const res = await fetch(`/api/tagihan/${id}/bayar`, { method: "PUT", headers: { "Content-Type": "application/json" } });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error ?? "Gagal menandai lunas");
   return json;

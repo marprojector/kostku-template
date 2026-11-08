@@ -17,14 +17,23 @@ export async function GET(req: NextRequest) {
     ? tanggalParam
     : new Date().toLocaleDateString("sv-SE"); // YYYY-MM-DD di timezone server
 
-  // Peta kamar: semua kamar + penyewa aktif untuk grid visual
+  // Peta kamar: semua kamar + penyewa aktif + status tagihan periode berjalan
+  const bulan = now.slice(0, 7);
   const kamarRows = db.prepare(`
-    SELECT k.id, k.nomor, k.status, k.harga_sewa, p.nama as penyewa
+    SELECT k.id, k.nomor, k.status, k.harga_sewa, p.nama as penyewa, p.id as penyewa_id,
+           (SELECT t.id FROM tagihan t
+            JOIN kontrak_sewa ks2 ON ks2.id = t.kontrak_id
+            WHERE ks2.kamar_id = k.id AND t.periode = ?
+            ORDER BY t.id DESC LIMIT 1) as tagihan_id,
+           (SELECT t.status FROM tagihan t
+            JOIN kontrak_sewa ks2 ON ks2.id = t.kontrak_id
+            WHERE ks2.kamar_id = k.id AND t.periode = ?
+            ORDER BY t.id DESC LIMIT 1) as tagihan_status
     FROM kamar k
     LEFT JOIN kontrak_sewa ks ON ks.kamar_id = k.id AND ks.status = 'aktif'
     LEFT JOIN penyewa p ON p.id = ks.penyewa_id
     ORDER BY CAST(SUBSTR(k.nomor, 7) AS INTEGER)
-  `).all() as Array<{ id: number; nomor: string; status: string; harga_sewa: number; penyewa: string | null }>;
+  `).all(bulan, bulan) as Array<{ id: number; nomor: string; status: string; harga_sewa: number; penyewa: string | null; penyewa_id: number | null; tagihan_id: number | null; tagihan_status: string | null }>;
   const totalKamar = db.prepare("SELECT COUNT(*) as c FROM kamar").get() as { c: number };
   const kamarTerisi = db.prepare("SELECT COUNT(*) as c FROM kamar WHERE status = 'terisi'").get() as { c: number };
 
@@ -59,7 +68,6 @@ export async function GET(req: NextRequest) {
   `).all(now) as Array<Record<string, unknown>>;
 
   // Pendapatan & pengeluaran bulan berjalan
-  const bulan = now.slice(0, 7);
   const pdp = db.prepare(`
     SELECT COALESCE(SUM(nominal), 0) as total FROM transaksi
     WHERE tipe = 'pemasukan' AND tanggal LIKE ?
@@ -127,7 +135,16 @@ export async function GET(req: NextRequest) {
       tersedia: totalKamar.c - kamarTerisi.c,
       persen: Math.round((kamarTerisi.c / totalKamar.c) * 100),
     },
-    kamar: kamarRows.map((r) => ({ id: r.id, nomor: r.nomor, status: r.status, penyewa: r.penyewa, harga: r.harga_sewa })),
+    kamar: kamarRows.map((r) => ({
+      id: r.id,
+      nomor: r.nomor,
+      status: r.status,
+      penyewa: r.penyewa,
+      penyewaId: r.penyewa_id,
+      harga: r.harga_sewa,
+      tagihanStatus: r.tagihan_status,
+      tagihanId: r.tagihan_id,
+    })),
     tagihan: {
       belumLunas: totalTagihan.total,
       totalBelumLunas: belumLunas.c,

@@ -18,7 +18,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   if (!tagihan) return NextResponse.json({ error: "Tagihan tidak ditemukan" }, { status: 404 });
   if (tagihan.status === "lunas") return NextResponse.json({ error: "Tagihan sudah lunas" }, { status: 400 });
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toLocaleDateString("sv-SE");
 
   db.prepare("UPDATE tagihan SET status = 'lunas', tanggal_bayar = ? WHERE id = ?").run(today, id);
   db.prepare(

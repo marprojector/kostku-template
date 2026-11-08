@@ -42,7 +42,7 @@ export function Shell() {
     }
     switch (page) {
       case "dashboard":
-        return <Dashboard />;
+        return <Dashboard onSelectPenyewa={handleSelectPenyewa} />;
       case "database":
         return <DatabaseKamar onSelectPenyewa={handleSelectPenyewa} />;
       case "input-sewa":
@@ -60,7 +60,7 @@ export function Shell() {
       case "pengaturan":
         return <PengaturanPage />;
       default:
-        return <Dashboard />;
+        return <Dashboard onSelectPenyewa={handleSelectPenyewa} />;
     }
   }
 

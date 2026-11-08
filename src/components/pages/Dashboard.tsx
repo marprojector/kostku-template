@@ -7,40 +7,161 @@ import { useApi } from "@/lib/useApi";
 import { useState } from "react";
 
 
-/* Signature element: peta kamar 21 kotak */
-function RoomMap({ rooms }: { rooms: DashboardStats["kamar"] }) {
+/* Signature element: peta kamar dengan status pembayaran per kamar */
+function RoomMap({
+  rooms,
+  onOpenPenyewa,
+  onBayar,
+  busy,
+}: {
+  rooms: DashboardStats["kamar"];
+  onOpenPenyewa?: (id: number) => void;
+  onBayar?: (id: number) => void;
+  busy?: number | null;
+}) {
   const [selected, setSelected] = useState<number | null>(null);
   const sel = rooms.find((r) => r.id === selected) ?? null;
+
+  const nunggak = rooms.filter((r) => r.status === "terisi" && r.tagihanStatus === "belum_lunas").length;
+  const aman = rooms.filter((r) => r.status === "terisi" && r.tagihanStatus === "lunas").length;
+  const kosong = rooms.filter((r) => r.status === "tersedia").length;
+
   return (
     <Card>
-      <SectionTitle sub={`${rooms.filter((r) => r.status === "terisi").length} terisi · ${rooms.filter((r) => r.status === "tersedia").length} tersedia`}>
-        Peta Kamar
-      </SectionTitle>
-      <div className="room-grid" role="list" aria-label="Status 21 kamar">
-        {rooms.map((r) => (
-          <button
-            key={r.id}
-            role="listitem"
-            className="room-cell"
-            data-status={r.status}
-            data-selected={selected === r.id}
-            onClick={() => setSelected(selected === r.id ? null : r.id)}
-            aria-label={`${r.nomor} ${r.status === "terisi" ? `dihuni ${r.penyewa ?? ""}` : "tersedia"}`}
+      <SectionTitle sub={`${aman + nunggak} terisi · ${kosong} kosong`}>Peta Kamar</SectionTitle>
+
+      {/* Ring status: kehilangan uang = merah, aman = hijau, peluang = abu */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+        {[
+          { label: `${nunggak} nunggak`, count: nunggak, bg: "var(--danger-bg)", color: "var(--danger)" },
+          { label: `${aman} lunas`, count: aman, bg: "var(--success-bg)", color: "var(--success)" },
+          { label: `${kosong} kosong`, count: kosong, bg: "var(--surface-2)", color: "var(--text-muted)" },
+        ].map((chip) => (
+          <span
+            key={chip.label}
+            style={{
+              fontSize: 11.5,
+              fontWeight: 600,
+              padding: "4px 10px",
+              borderRadius: 999,
+              background: chip.bg,
+              color: chip.color,
+            }}
           >
-            <span style={{ fontSize: 12.5, fontWeight: 700 }}>{r.nomor.replace("Kamar ", "")}</span>
-            <span style={{ fontSize: 10.5, color: "var(--text-muted)", lineHeight: 1.35 }}>
-              {r.status === "terisi" ? (r.penyewa?.split(" ")[0] ?? "terisi") : formatRupiahShort(r.harga)}
-            </span>
-          </button>
+            {chip.label}
+          </span>
         ))}
       </div>
+
+      <div className="room-grid" role="list" aria-label="Status 21 kamar">
+        {rooms.map((r) => {
+          const nunggakBulan = r.status === "terisi" && r.tagihanStatus === "belum_lunas";
+          return (
+            <button
+              key={r.id}
+              role="listitem"
+              className="room-cell"
+              data-status={r.status}
+              data-tagihan={nunggakBulan ? "belum" : r.status === "terisi" ? "lunas" : undefined}
+              data-selected={selected === r.id}
+              onClick={() => setSelected(selected === r.id ? null : r.id)}
+              aria-label={
+                r.status === "terisi"
+                  ? `${r.nomor} dihuni ${r.penyewa ?? ""}, tagihan ${nunggakBulan ? "belum lunas" : "lunas"}`
+                  : `${r.nomor} tersedia, ${formatRupiah(r.harga)}/bulan`
+              }
+            >
+              <span style={{ fontSize: 12.5, fontWeight: 700 }}>{r.nomor.replace("Kamar ", "")}</span>
+              <span style={{ fontSize: 10.5, color: "var(--text-muted)", lineHeight: 1.35 }}>
+                {r.status === "terisi" ? (r.penyewa?.split(" ")[0] ?? "terisi") : formatRupiahShort(r.harga)}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Panel detail kamar terpilih */}
       {sel && (
-        <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid var(--border)", fontSize: 13 }}>
-          <span style={{ fontWeight: 600 }}>{sel.nomor}</span>
-          {" — "}
-          {sel.status === "terisi"
-            ? `dihuni ${sel.penyewa ?? "—"} · ${formatRupiah(sel.harga)}/bulan`
-            : `tersedia · ${formatRupiah(sel.harga)}/bulan`}
+        <div
+          style={{
+            marginTop: 14,
+            padding: "14px 16px",
+            background: "var(--surface-2)",
+            borderRadius: "var(--radius)",
+            border: "1px solid var(--border)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+            <div>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 15, letterSpacing: "-0.02em" }}>
+                {sel.nomor}
+                <span
+                  style={{
+                    marginLeft: 8,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    padding: "3px 9px",
+                    borderRadius: 999,
+                    background:
+                      sel.status !== "terisi"
+                        ? "var(--surface-3)"
+                        : sel.tagihanStatus === "lunas"
+                          ? "var(--success-bg)"
+                          : "var(--danger-bg)",
+                    color:
+                      sel.status !== "terisi"
+                        ? "var(--text-muted)"
+                        : sel.tagihanStatus === "lunas"
+                          ? "var(--success)"
+                          : "var(--danger)",
+                  }}
+                >
+                  {sel.status !== "terisi" ? "Tersedia" : sel.tagihanStatus === "lunas" ? "Lunas" : "Belum Bayar"}
+                </span>
+              </div>
+              <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
+                {sel.status === "terisi" ? (
+                  <>
+                    {sel.penyewa ?? "—"} · <span className="tnum" style={{ fontWeight: 600, color: "var(--text)" }}>{formatRupiah(sel.harga)}</span>/bulan
+                  </>
+                ) : (
+                  <>
+                    Kosong · potensi <span className="tnum" style={{ fontWeight: 600, color: "var(--text)" }}>{formatRupiah(sel.harga)}</span>/bulan
+                  </>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={() => setSelected(null)}
+              aria-label="Tutup detail kamar"
+              style={{
+                border: "none",
+                background: "transparent",
+                color: "var(--text-faint)",
+                cursor: "pointer",
+                fontSize: 16,
+                lineHeight: 1,
+                padding: 2,
+              }}
+            >
+              ×
+            </button>
+          </div>
+
+          {sel.status === "terisi" && (
+            <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+              {sel.tagihanStatus === "belum_lunas" && onBayar && (
+                <Button size="sm" variant="primary" onClick={() => sel.tagihanId && onBayar(sel.tagihanId)} disabled={busy === sel.tagihanId}>
+                  {busy === sel.id ? "Memproses…" : "Tandai Lunas"}
+                </Button>
+              )}
+              {sel.penyewaId && onOpenPenyewa && (
+                <Button size="sm" variant="secondary" onClick={() => onOpenPenyewa(sel.penyewaId!)}>
+                  Profil Penyewa
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </Card>
@@ -98,7 +219,7 @@ function CashFlow({ series }: { series: DashboardStats["arusKas"] }) {
   );
 }
 
-export function Dashboard() {
+export function Dashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: number) => void } = {}) {
   const { data, loading, error, reload } = useApi<DashboardStats>(() => fetchDashboard());
   const [busy, setBusy] = useState<number | null>(null);
 
@@ -186,7 +307,7 @@ export function Dashboard() {
 
       {/* Hero: peta kamar + arus kas berdampingan */}
       <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 16, marginBottom: 16 }} className="grid-2 kostku-rise">
-        <RoomMap rooms={data.kamar} />
+        <RoomMap rooms={data.kamar} onOpenPenyewa={onSelectPenyewa} onBayar={handleBayar} busy={busy} />
         <CashFlow series={data.arusKas} />
       </div>
 

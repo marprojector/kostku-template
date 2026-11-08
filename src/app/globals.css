@@ -314,6 +314,14 @@ tbody tr:hover {
   background: linear-gradient(160deg, var(--primary-soft), color-mix(in srgb, var(--primary) 14%, var(--card-bg)));
   border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
 }
+.room-cell[data-tagihan="belum"] {
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  box-shadow: inset 3px 0 0 var(--danger);
+}
+.room-cell[data-tagihan="belum"]::after {
+  background: var(--danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 18%, transparent);
+}
 .room-cell[data-status="terisi"]::after {
   content: "";
   position: absolute;
