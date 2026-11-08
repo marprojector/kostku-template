@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/ui";
-import { fetchPenyewaProfil, formatRupiah, waLink, perpanjangKontrak, type PenyewaProfil } from "@/lib/api";
+import { fetchPenyewaProfil, formatRupiah, waLink, perpanjangKontrak, updatePenyewa, checkoutKontrak, type PenyewaProfil } from "@/lib/api";
 import { selisihHari, tanggalPendek } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 
@@ -17,6 +17,53 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
   const [perpanjangErr, setPerpanjangErr] = useState<string | null>(null);
   const [perpanjangOk, setPerpanjangOk] = useState<string | null>(null);
   const [savingPerpanjang, setSavingPerpanjang] = useState(false);
+  const [editingKontak, setEditingKontak] = useState(false);
+  const [editNama, setEditNama] = useState("");
+  const [editWa, setEditWa] = useState("");
+  const [kontakErr, setKontakErr] = useState<string | null>(null);
+  const [savingKontak, setSavingKontak] = useState(false);
+  const [checkoutErr, setCheckoutErr] = useState<string | null>(null);
+  const [savingCheckout, setSavingCheckout] = useState(false);
+
+  function mulaiEditKontak() {
+    setEditNama(penyewaNama);
+    setEditWa(penyewaWa);
+    setKontakErr(null);
+    setEditingKontak(true);
+  }
+
+  async function simpanKontak() {
+    if (!editNama.trim()) {
+      setKontakErr("Nama wajib diisi.");
+      return;
+    }
+    setSavingKontak(true);
+    setKontakErr(null);
+    try {
+      await updatePenyewa(penyewaId, { nama: editNama.trim(), noWa: editWa.trim() });
+      setEditingKontak(false);
+      reload();
+    } catch (err) {
+      setKontakErr(err instanceof Error ? err.message : "Gagal menyimpan");
+    } finally {
+      setSavingKontak(false);
+    }
+  }
+
+  async function handleCheckout() {
+    if (!kontrakAktif) return;
+    if (!window.confirm(`Check-out penyewa ini dari ${kamarAktif}? Kamar akan jadi tersedia.`)) return;
+    setSavingCheckout(true);
+    setCheckoutErr(null);
+    try {
+      await checkoutKontrak(kontrakAktif.id as number);
+      reload();
+    } catch (err) {
+      setCheckoutErr(err instanceof Error ? err.message : "Gagal check-out");
+    } finally {
+      setSavingCheckout(false);
+    }
+  }
 
   async function handlePerpanjang(kontrakId: number) {
     const hari = Number(tambahHari);
@@ -57,6 +104,9 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
   }
 
   const { penyewa, kontrak, tagihan, transaksi, waLog } = data;
+
+  const penyewaNama = penyewa.nama as string;
+  const penyewaWa = (penyewa.no_wa as string) ?? "";
 
   const kontrakAktif = kontrak.find((k) => {
     const s = k.status as string;
@@ -115,41 +165,74 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
   return (
     <div>
       <PageHeader
-        title={penyewa.nama as string}
+        title={penyewaNama}
         sub={`ID Penyewa #${penyewa.id}`}
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             <Button variant="secondary" onClick={onBack}>Kembali</Button>
             <Button variant="primary" onClick={() => {
-              const msg = `Halo ${penyewa.nama}, ada yang bisa kami bantu?`;
-              handleWhatsApp(penyewa.no_wa as string, msg);
+              const msg = `Halo ${penyewaNama}, ada yang bisa kami bantu?`;
+              handleWhatsApp(penyewaWa, msg);
             }}>
               Kirim WhatsApp
             </Button>
+            {kontrakAktif && (
+              <Button variant="danger" onClick={handleCheckout} disabled={savingCheckout}>
+                {savingCheckout ? "Memproses…" : "Check-Out"}
+              </Button>
+            )}
           </div>
         }
       />
 
       {/* Info kontak */}
       <Card style={{ marginBottom: 16 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16 }}>
+        {editingKontak ? (
           <div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2 }}>Nomor WhatsApp</div>
-            <div style={{ fontWeight: 600 }}>{penyewa.no_wa ?? "—"}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }} className="grid-2">
+              <div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Nama</div>
+                <input value={editNama} onChange={(e) => setEditNama(e.target.value)} aria-label="Nama penyewa" />
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Nomor WhatsApp</div>
+                <input value={editWa} onChange={(e) => setEditWa(e.target.value)} placeholder="08…" inputMode="numeric" aria-label="Nomor WhatsApp penyewa" />
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, marginTop: 12, alignItems: "center" }}>
+              <Button size="sm" variant="primary" onClick={simpanKontak} disabled={savingKontak}>
+                {savingKontak ? "Menyimpan…" : "Simpan"}
+              </Button>
+              <Button size="sm" variant="secondary" onClick={() => setEditingKontak(false)}>Batal</Button>
+              {kontakErr && <span role="alert" style={{ fontSize: 12.5, color: "var(--danger)" }}>{kontakErr}</span>}
+            </div>
           </div>
+        ) : (
           <div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2 }}>Kamar Aktif</div>
-            <div style={{ fontWeight: 600 }}>{kamarAktif}</div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16 }}>
+              <div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2 }}>Nomor WhatsApp</div>
+                <div style={{ fontWeight: 600 }}>{penyewaWa || "—"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2 }}>Kamar Aktif</div>
+                <div style={{ fontWeight: 600 }}>{kamarAktif}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2 }}>Sewa/Bulan</div>
+                <div className="tnum" style={{ fontWeight: 600 }}>{nominalAktif > 0 ? formatRupiah(nominalAktif) : "—"}</div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2 }}>Terdaftar</div>
+                <div style={{ fontWeight: 600 }}>{tanggalPendek(penyewa.created_at as string)}</div>
+              </div>
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <Button size="sm" variant="secondary" onClick={mulaiEditKontak}>Edit Kontak</Button>
+            </div>
           </div>
-          <div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2 }}>Sewa/Bulan</div>
-            <div className="tnum" style={{ fontWeight: 600 }}>{nominalAktif > 0 ? formatRupiah(nominalAktif) : "—"}</div>
-          </div>
-          <div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 2 }}>Terdaftar</div>
-            <div style={{ fontWeight: 600 }}>{tanggalPendek(penyewa.created_at as string)}</div>
-          </div>
-        </div>
+        )}
+        {checkoutErr && <div role="alert" style={{ marginTop: 10, fontSize: 13, color: "var(--danger)" }}>{checkoutErr}</div>}
       </Card>
 
       {/* Riwayat kontrak */}

@@ -345,6 +345,38 @@ export async function perpanjangKontrak(
   return json;
 }
 
+export async function deleteKamar(id: number): Promise<{ ok: boolean }> {
+  const res = await fetch(`/api/kamar/${id}`, { method: "DELETE" });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal menghapus kamar");
+  return json;
+}
+
+export async function checkoutKontrak(id: number): Promise<{ ok: boolean }> {
+  const res = await fetch(`/api/kontrak/${id}/selesai`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({}),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal check-out");
+  return json;
+}
+
+export async function updatePenyewa(
+  id: number,
+  payload: { nama?: string; noWa?: string }
+): Promise<{ ok: boolean }> {
+  const res = await fetch(`/api/penyewa/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal mengubah data penyewa");
+  return json;
+}
+
 export async function logWhatsApp(payload: {
   penyewaId: number;
   pesan: string;

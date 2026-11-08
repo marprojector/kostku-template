@@ -1,6 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { requireJson, sanitizeId, sanitizeString } from "@/lib/security";
+import { rateLimit, requireJson, sanitizeId, sanitizeString } from "@/lib/security";
+
+// DELETE /api/kamar/:id — hapus kamar (hanya yang tersedia & tanpa kontrak)
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const id = sanitizeId((await params).id);
+  if (!id) return NextResponse.json({ error: "ID kamar tidak valid" }, { status: 400 });
+
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
+  const db = getDb();
+  const kamar = db.prepare("SELECT * FROM kamar WHERE id = ?").get(id) as Record<string, unknown> | undefined;
+  if (!kamar) return NextResponse.json({ error: "Kamar tidak ditemukan" }, { status: 404 });
+  if (kamar.status !== "tersedia") {
+    return NextResponse.json({ error: "Kamar masih terisi — lakukan check-out dulu" }, { status: 400 });
+  }
+
+  const kontrakAktif = db.prepare(
+    "SELECT id FROM kontrak_sewa WHERE kamar_id = ? AND status = 'aktif'"
+  ).get(id);
+  if (kontrakAktif) {
+    return NextResponse.json({ error: "Kamar masih punya kontrak aktif" }, { status: 400 });
+  }
+
+  db.prepare("DELETE FROM kamar WHERE id = ?").run(id);
+  return NextResponse.json({ ok: true });
+}
 
 // PUT /api/kamar/:id — edit kamar
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

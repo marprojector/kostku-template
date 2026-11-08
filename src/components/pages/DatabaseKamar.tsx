@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/ui";
-import { fetchKamar, formatRupiah, waLink, createKamar, updateKamar, type RoomRow } from "@/lib/api";
+import { fetchKamar, formatRupiah, waLink, createKamar, updateKamar, deleteKamar, type RoomRow } from "@/lib/api";
 import { tanggalPendek } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 
@@ -73,6 +73,19 @@ export function DatabaseKamar({ onSelectPenyewa }: Props) {
       reload();
     } catch (err) {
       setAddErr(err instanceof Error ? err.message : "Gagal menambah kamar");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function hapus(r: RoomRow) {
+    if (!window.confirm(`Hapus ${r.kamar.nomor}? Tindakan ini tidak bisa dibatalkan.`)) return;
+    setSaving(true);
+    try {
+      await deleteKamar(r.kamar.id);
+      reload();
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : "Gagal menghapus kamar");
     } finally {
       setSaving(false);
     }
@@ -247,6 +260,11 @@ export function DatabaseKamar({ onSelectPenyewa }: Props) {
                       ) : (
                         <span style={{ display: "inline-flex", gap: 6 }}>
                           <Button size="sm" variant="secondary" onClick={() => mulaiEdit(r)}>Edit</Button>
+                          {r.kamar.status === "tersedia" && (
+                            <Button size="sm" variant="secondary" onClick={() => hapus(r)} disabled={saving}>
+                              Hapus
+                            </Button>
+                          )}
                           {r.penyewa && (
                             <a
                               href={waLink(

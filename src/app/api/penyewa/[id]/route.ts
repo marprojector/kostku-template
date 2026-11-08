@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { rateLimit } from "@/lib/security";
+import { rateLimit, requireJson, sanitizeString } from "@/lib/security";
+import { normalisasiWa } from "@/lib/format";
 
 // GET /api/penyewa/:id — profil + riwayat
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -49,4 +50,51 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   `).all(id) as Array<Record<string, unknown>>;
 
   return NextResponse.json({ penyewa, kontrak, tagihan, transaksi, waLog });
+}
+
+// PUT /api/penyewa/:id — edit data penyewa (nama, nomor WA)
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const rawId = Number.parseInt((await params).id, 10);
+  if (!Number.isSafeInteger(rawId) || rawId <= 0) {
+    return NextResponse.json({ error: "ID penyewa tidak valid" }, { status: 400 });
+  }
+
+  const limited = rateLimit(req);
+  if (limited) return limited;
+
+  const contentError = requireJson(req);
+  if (contentError) return contentError;
+
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "JSON tidak valid" }, { status: 400 });
+  }
+
+  const input = body as { nama?: unknown; noWa?: unknown };
+  const updates: string[] = [];
+  const values: Array<string | number> = [];
+
+  if (input.nama !== undefined) {
+    const nama = sanitizeString(input.nama, 100);
+    if (!nama) return NextResponse.json({ error: "Nama tidak valid" }, { status: 400 });
+    updates.push("nama = ?");
+    values.push(nama);
+  }
+  if (input.noWa !== undefined) {
+    const noWaRaw = sanitizeString(input.noWa, 20);
+    const noWa = noWaRaw ? normalisasiWa(noWaRaw) : "";
+    updates.push("no_wa = ?");
+    values.push(noWa);
+  }
+  if (updates.length === 0) {
+    return NextResponse.json({ error: "Tidak ada field yang diupdate" }, { status: 400 });
+  }
+
+  const db = getDb();
+  const result = db.prepare(`UPDATE penyewa SET ${updates.join(", ")} WHERE id = ?`).run(...values, rawId);
+  if (result.changes === 0) return NextResponse.json({ error: "Penyewa tidak ditemukan" }, { status: 404 });
+
+  return NextResponse.json({ ok: true });
 }
