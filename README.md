@@ -1,6 +1,6 @@
 # KostKu
 
-Dashboard manajemen kos untuk **Kos Perajin** (21 kamar). Mengelola kamar, penyewa, kontrak sewa, tagihan bulanan, pengeluaran, dan laporan keuangan — dengan pengingat tagihan lewat WhatsApp.
+Dashboard manajemen kos untuk **Kos Perajin** (6 kamar). Mengelola kamar, penyewa, kontrak sewa, tagihan bulanan, pengeluaran, dan laporan keuangan — dengan pengingat tagihan lewat WhatsApp.
 
 Dokumen produk lengkap: [`PRD.md`](./PRD.md).
 
@@ -22,7 +22,7 @@ cp .env.example .env.local   # isi AUTH_SECRET, OWNER_EMAIL, OWNER_PASSWORD
 npm run dev                  # http://localhost:3000
 ```
 
-Database `kostku.db` dibuat dan di-seed otomatis pada request pertama (21 kamar, 12 penyewa, kontrak aktif, tagihan, transaksi contoh).
+Database `kostku.db` dibuat dan di-seed otomatis pada request pertama (6 kamar kosong, transaksi contoh — penyewa diisi lewat Check-In).
 
 Produksi:
 
@@ -78,7 +78,7 @@ src/
 | Halaman | Fungsi |
 |---------|--------|
 | Menu Utama | Okupansi, KPI keuangan, jatuh tempo, tunggakan dengan aksi cepat |
-| Database Kamar | Daftar 21 kamar, filter status, pencarian, tombol WhatsApp |
+| Database Kamar | Daftar kamar, filter status, pencarian, tombol WhatsApp |
 | Check-In Penyewa | Form kontrak baru → membuat penyewa, kontrak, tagihan pertama, deposit |
 | Tagihan & WhatsApp | Daftar tagihan, filter status, tandai lunas, kirim pengingat |
 | Tunggakan & Masa Sewa | Tagihan lewat tempo + kontrak berakhir bulan ini |

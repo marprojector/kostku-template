@@ -53,7 +53,7 @@ function RoomMap({
         ))}
       </div>
 
-      <div className="room-grid" role="list" aria-label="Status 21 kamar">
+      <div className="room-grid" role="list" aria-label="Peta status kamar">
         {rooms.map((r) => {
           const nunggakBulan = r.status === "terisi" && r.tagihanStatus === "belum_lunas";
           return (
