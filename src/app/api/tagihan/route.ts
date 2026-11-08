@@ -14,13 +14,15 @@ export async function GET(req: NextRequest) {
   const periode = searchParams.get("periode");
   const status = searchParams.get("status");
 
+  const semua = searchParams.get("semua") === "1";
+
   let rows = db.prepare(`
     SELECT t.*, p.nama as nama_penyewa, p.no_wa, k.nomor as kamar_nomor
     FROM tagihan t
     JOIN kontrak_sewa ks ON ks.id = t.kontrak_id
     JOIN penyewa p ON p.id = ks.penyewa_id
     JOIN kamar k ON k.id = ks.kamar_id
-    ORDER BY t.jatuh_tempo ASC
+    ${semua ? "ORDER BY t.jatuh_tempo ASC" : "WHERE ks.status = 'aktif' ORDER BY t.jatuh_tempo ASC"}
   `).all() as Array<Record<string, unknown>>;
 
   if (periode) rows = rows.filter((r) => r.periode === periode);

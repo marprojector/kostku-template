@@ -197,10 +197,12 @@ export async function fetchKontrak(status?: string): Promise<KontrakSewa[]> {
 export async function fetchTagihan(params?: {
   periode?: string;
   status?: string;
+  semua?: string;
 }): Promise<TagihanDetail[]> {
   const qs = new URLSearchParams();
   if (params?.periode) qs.set("periode", params.periode);
   if (params?.status) qs.set("status", params.status);
+  if (params?.semua) qs.set("semua", params.semua);
   const raw = await getJson<RawTagihan[]>(
     "/api/tagihan" + (qs.size > 0 ? `?${qs}` : "")
   );
@@ -353,11 +355,7 @@ export async function deleteKamar(id: number): Promise<{ ok: boolean }> {
 }
 
 export async function checkoutKontrak(id: number): Promise<{ ok: boolean }> {
-  const res = await fetch(`/api/kontrak/${id}/selesai`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({}),
-  });
+  const res = await fetch(`/api/kontrak/${id}/selesai`, { method: "POST" });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error ?? "Gagal check-out");
   return json;

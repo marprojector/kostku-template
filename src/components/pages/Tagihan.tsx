@@ -12,7 +12,8 @@ type StatusFilter = "semua" | "lunas" | "belum_lunas";
 
 export function Tagihan() {
   const bulanIni = useBulanIni();
-  const { data, loading, error, reload } = useApi<TagihanDetail[]>(() => fetchTagihan());
+  const [riwayat, setRiwayat] = useState(false);
+  const { data, loading, error, reload } = useApi<TagihanDetail[]>(() => fetchTagihan({ semua: riwayat ? "1" : undefined }), [riwayat]);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("semua");
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState<number | null>(null);
@@ -117,6 +118,15 @@ export function Tagihan() {
           ))}
         </div>
         <div style={{ flex: 1 }} />
+        <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--text-muted)", cursor: "pointer" }}>
+          <input
+            type="checkbox"
+            checked={riwayat}
+            onChange={(e) => setRiwayat(e.target.checked)}
+            style={{ width: "auto", margin: 0 }}
+          />
+          Tampilkan riwayat (kontrak selesai)
+        </label>
         <input
           placeholder="Cari kamar atau penyewa…"
           value={q}
