@@ -129,7 +129,7 @@ export function Shell() {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => setPage(item.id)}
+                    onClick={() => { setSelectedPenyewaId(null); setPage(item.id); }}
                     aria-current={active ? "page" : undefined}
                     className="kostku-navitem"
                   >
