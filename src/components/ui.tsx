@@ -20,6 +20,7 @@ export function Card({
         border: "1px solid var(--border)",
         borderRadius: "var(--radius)",
         boxShadow: "var(--shadow-card)",
+        padding: "20px 22px",
         ...style,
       }}
     >
