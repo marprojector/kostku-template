@@ -391,9 +391,7 @@ export function formatRupiah(n: number): string {
   return "Rp " + n.toLocaleString("id-ID");
 }
 
-export function waLink(noWa: string, pesan: string): string {
-  return `https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`;
-}
+export { waLink } from "./format";
 
 export interface PenyewaProfil {
   penyewa: { id: number; nama: string; no_wa: string; kamar_id: number | null; created_at: string };

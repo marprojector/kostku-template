@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/ui";
 import { fetchPenyewaProfil, formatRupiah, waLink, perpanjangKontrak, updatePenyewa, checkoutKontrak, type PenyewaProfil } from "@/lib/api";
-import { selisihHari, tanggalPendek } from "@/lib/format";
+import { selisihHari, tanggalPendek, tampilWa } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 
 interface Props {
@@ -106,7 +106,7 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
   const { penyewa, kontrak, tagihan, transaksi, waLog } = data;
 
   const penyewaNama = penyewa.nama as string;
-  const penyewaWa = (penyewa.no_wa as string) ?? "";
+  const penyewaWa = tampilWa((penyewa.no_wa as string) ?? "");
 
   const kontrakAktif = kontrak.find((k) => {
     const s = k.status as string;

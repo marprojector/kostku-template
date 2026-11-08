@@ -54,8 +54,15 @@ export function normalisasiWa(input: string): string {
   return digits;
 }
 
+/** Kebalikan normalisasiWa: 62… → 08… untuk ditampilkan ke user */
+export function tampilWa(noWa: string): string {
+  const digits = noWa.replace(/\D/g, "");
+  if (digits.startsWith("62")) return "0" + digits.slice(2);
+  return digits;
+}
+
 export function waLink(noWa: string, pesan: string): string {
-  return `https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`;
+  return `https://wa.me/${normalisasiWa(noWa)}?text=${encodeURIComponent(pesan)}`;
 }
 
 /** ISO date (YYYY-MM-DD) timezone lokal — bukan UTC */
