@@ -69,7 +69,6 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr)",
           minHeight: "100vh",
           background: "var(--bg)",
         }}
