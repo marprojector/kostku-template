@@ -1,6 +1,12 @@
 "use client";
 
 import type { CSSProperties, ReactNode } from "react";
+import { cn } from "@/lib/utils";
+
+/* ============================================================
+   Primitif UI KostKu — gaya shadcn/ui (rounded-lg, ring focus,
+   muted foreground, subtle shadow). Dipakai di semua halaman.
+   ============================================================ */
 
 /* ---------- Card ---------- */
 export function Card({
@@ -14,15 +20,11 @@ export function Card({
 }) {
   return (
     <div
-      className={className}
-      style={{
-        background: "var(--card-bg)",
-        border: "1px solid var(--border)",
-        borderRadius: "var(--radius)",
-        boxShadow: "var(--shadow-card)",
-        padding: "20px 22px",
-        ...style,
-      }}
+      className={cn(
+        "rounded-lg border border-[var(--shadcn-border)] bg-[var(--card)] text-[var(--card-foreground)] shadow-sm",
+        className
+      )}
+      style={{ padding: "20px 22px", ...style }}
     >
       {children}
     </div>
@@ -33,8 +35,8 @@ export function Card({
 export function SectionTitle({ children, sub }: { children: ReactNode; sub?: string }) {
   return (
     <div style={{ marginBottom: 12 }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 15.5, fontWeight: 700, letterSpacing: "-0.02em" }}>{children}</div>
-      {sub && <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3 }}>{sub}</div>}
+      <div style={{ fontFamily: "var(--font-display)", fontSize: 15.5, fontWeight: 700, letterSpacing: "-0.02em", color: "var(--foreground)" }}>{children}</div>
+      {sub && <div style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 3 }}>{sub}</div>}
     </div>
   );
 }
@@ -61,8 +63,8 @@ export function PageHeader({
       }}
     >
       <div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 23, fontWeight: 800, margin: 0, letterSpacing: "-0.03em" }}>{title}</h1>
-        {sub && <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>{sub}</div>}
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 23, fontWeight: 800, margin: 0, letterSpacing: "-0.03em", color: "var(--foreground)" }}>{title}</h1>
+        {sub && <div style={{ fontSize: 13, color: "var(--muted-foreground)", marginTop: 4 }}>{sub}</div>}
       </div>
       {actions && <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>{actions}</div>}
     </div>
@@ -73,17 +75,18 @@ export function PageHeader({
 type BadgeTone = "neutral" | "success" | "warning" | "danger" | "primary";
 
 const TONES: Record<BadgeTone, { bg: string; fg: string }> = {
-  neutral: { bg: "var(--surface-2)", fg: "var(--text-muted)" },
-  success: { bg: "var(--success-bg)", fg: "var(--success)" },
-  warning: { bg: "var(--warning-bg)", fg: "var(--warning)" },
-  danger: { bg: "var(--danger-bg)", fg: "var(--danger)" },
-  primary: { bg: "var(--primary-soft)", fg: "var(--primary)" },
+  neutral: { bg: "var(--muted)", fg: "var(--muted-foreground)" },
+  success: { bg: "color-mix(in srgb, var(--success) 14%, transparent)", fg: "var(--success)" },
+  warning: { bg: "color-mix(in srgb, var(--warning) 16%, transparent)", fg: "var(--warning)" },
+  danger: { bg: "color-mix(in srgb, var(--danger) 12%, transparent)", fg: "var(--danger)" },
+  primary: { bg: "color-mix(in srgb, var(--primary) 12%, transparent)", fg: "var(--primary)" },
 };
 
-export function Badge({ tone = "neutral", children }: { tone?: BadgeTone; children: ReactNode }) {
+export function Badge({ tone = "neutral", children, className }: { tone?: BadgeTone; children: ReactNode; className?: string }) {
   const { bg, fg } = TONES[tone];
   return (
     <span
+      className={cn("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold", className)}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -107,15 +110,28 @@ type Variant = "primary" | "secondary" | "ghost" | "success" | "danger";
 
 const VARIANTS: Record<Variant, CSSProperties> = {
   primary: {
-    background: "linear-gradient(180deg, color-mix(in srgb, var(--primary) 88%, #fff), var(--primary))",
-    color: "#fff",
-    border: "1px solid color-mix(in srgb, var(--primary) 80%, #000)",
-    boxShadow: "0 1px 2px rgba(23,27,36,0.12), 0 4px 12px -4px var(--primary-ring)",
+    background: "var(--primary)",
+    color: "var(--primary-foreground)",
+    border: "1px solid var(--primary)",
+    boxShadow: "0 1px 2px rgba(23,27,36,0.12)",
   },
-  secondary: { background: "var(--card-bg)", color: "var(--text)", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-kpi)" },
-  ghost: { background: "transparent", color: "var(--text-muted)", border: "1px solid transparent" },
-  success: { background: "var(--success-bg)", color: "var(--success)", border: "1px solid color-mix(in srgb, var(--success) 35%, transparent)" },
-  danger: { background: "var(--danger-bg)", color: "var(--danger)", border: "1px solid color-mix(in srgb, var(--danger) 35%, transparent)" },
+  secondary: {
+    background: "var(--card)",
+    color: "var(--foreground)",
+    border: "1px solid var(--shadcn-border)",
+    boxShadow: "var(--shadow-kpi)",
+  },
+  ghost: { background: "transparent", color: "var(--muted-foreground)", border: "1px solid transparent" },
+  success: {
+    background: "color-mix(in srgb, var(--success) 14%, transparent)",
+    color: "var(--success)",
+    border: "1px solid color-mix(in srgb, var(--success) 35%, transparent)",
+  },
+  danger: {
+    background: "color-mix(in srgb, var(--danger) 12%, transparent)",
+    color: "var(--danger)",
+    border: "1px solid color-mix(in srgb, var(--danger) 35%, transparent)",
+  },
 };
 
 export function Button({
@@ -126,6 +142,7 @@ export function Button({
   type = "button",
   disabled,
   style,
+  className,
 }: {
   children: ReactNode;
   onClick?: () => void;
@@ -134,12 +151,19 @@ export function Button({
   type?: "button" | "submit";
   disabled?: boolean;
   style?: CSSProperties;
+  className?: string;
 }) {
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
+      className={cn(
+        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2",
+        disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+        className
+      )}
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -149,7 +173,6 @@ export function Button({
         fontSize: size === "sm" ? 12 : 13.5,
         fontWeight: 600,
         borderRadius: 8,
-        cursor: disabled ? "not-allowed" : "pointer",
         whiteSpace: "nowrap",
         ...VARIANTS[variant],
         ...style,
@@ -183,7 +206,7 @@ export function Stat({
         (delta.value < 0 && delta.goodWhen === "down")
     : null;
   const deltaColor =
-    isGood === null ? "var(--text-muted)" : isGood ? "var(--success)" : "var(--danger)";
+    isGood === null ? "var(--muted-foreground)" : isGood ? "var(--success)" : "var(--danger)";
 
   return (
     <Card style={{ padding: 0, overflow: "hidden" }}>
@@ -195,15 +218,15 @@ export function Stat({
             fontWeight: 600,
             textTransform: "uppercase",
             letterSpacing: "0.05em",
-            color: "var(--text-muted)",
+            color: "var(--muted-foreground)",
           }}
         >
           {label}
         </div>
-        <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 800, lineHeight: 1.12, marginTop: 6, letterSpacing: "-0.03em" }}>
+        <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 800, lineHeight: 1.12, marginTop: 6, letterSpacing: "-0.03em", color: "var(--foreground)" }}>
           {value}
         </div>
-        {sub && <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>{sub}</div>}
+        {sub && <div style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 4 }}>{sub}</div>}
         {delta && (
           <div style={{ fontSize: 12, fontWeight: 600, marginTop: 5, color: deltaColor }}>
             {deltaPositive ? "+" : ""}
@@ -223,10 +246,10 @@ export function EmptyState({ children }: { children: ReactNode }) {
       style={{
         padding: "32px 20px",
         textAlign: "center",
-        color: "var(--text-muted)",
+        color: "var(--muted-foreground)",
         fontSize: 13,
-        border: "1px dashed var(--border-strong)",
-        borderRadius: "var(--radius)",
+        border: "1px dashed var(--shadcn-border)",
+        borderRadius: "var(--radius-shadcn)",
       }}
     >
       {children}
@@ -241,7 +264,7 @@ export function Skeleton({ height = 16, width = "100%" }: { height?: number; wid
       style={{
         height,
         width,
-        background: "var(--surface-2)",
+        background: "var(--muted)",
         borderRadius: 6,
         animation: "kostku-pulse 1.6s ease-in-out infinite",
       }}

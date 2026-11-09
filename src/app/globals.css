@@ -247,10 +247,10 @@ select,
 textarea {
   font-family: inherit;
   font-size: 14px;
-  background: var(--card-bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--input);
+  border-radius: calc(var(--radius-shadcn) - 2px);
   padding: 10px 13px;
   transition: border-color 150ms ease, box-shadow 150ms ease;
   width: 100%;
@@ -264,8 +264,8 @@ input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px var(--primary-ring);
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 22%, transparent);
 }
 input::placeholder {
   color: var(--text-faint);
@@ -289,7 +289,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* ---------- Tables: editorial rules, generous rows ---------- */
+/* ---------- Tables: shadcn rules, generous rows ---------- */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -301,15 +301,16 @@ th {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--text-faint);
-  border-bottom: 1px solid var(--border-strong);
+  color: var(--muted-foreground);
+  border-bottom: 1px solid var(--shadcn-border);
   padding: 12px 16px;
   white-space: nowrap;
 }
 td {
   padding: 14px 16px;
   font-size: 14px;
-  border-bottom: 1px solid var(--border);
+  color: var(--foreground);
+  border-bottom: 1px solid var(--shadcn-border);
 }
 tbody tr:last-child td {
   border-bottom: none;
@@ -318,7 +319,7 @@ tbody tr {
   transition: background-color 120ms ease;
 }
 tbody tr:hover {
-  background: color-mix(in srgb, var(--primary) 3%, transparent);
+  background: color-mix(in srgb, var(--muted) 55%, transparent);
 }
 
 /* ---------- Layout: frame + inset sheet ---------- */
@@ -333,8 +334,8 @@ tbody tr:hover {
   width: calc(100% - 24px);
   max-width: 1280px;
   margin: 12px auto 16px;
-  background: var(--sheet);
-  border: 1px solid var(--border);
+  background: var(--background);
+  border: 1px solid var(--shadcn-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   padding: 32px 36px 56px;
@@ -360,24 +361,25 @@ tbody tr:hover {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 10;
   gap: 10px;
   width: 100%;
   padding: 9px 11px;
   margin-bottom: 2px;
-  border-radius: 9px;
+  border-radius: calc(var(--radius-shadcn) - 2px);
   border: none;
   cursor: pointer;
   text-align: left;
   font-size: 13.5px;
+  color: var(--sidebar-foreground);
   transition: background-color 120ms ease, color 120ms ease;
 }
 .kostku-navitem:hover {
-  background: var(--surface-2);
+  background: var(--sidebar-accent);
+  color: var(--sidebar-accent-foreground);
 }
 .kostku-navitem[aria-current="page"] {
-  background: var(--primary-soft);
-  color: var(--primary);
+  background: color-mix(in srgb, var(--sidebar-primary) 12%, transparent);
+  color: var(--sidebar-primary);
   font-weight: 600;
 }
 .kostku-navitem[aria-current="page"]::before {
@@ -388,7 +390,7 @@ tbody tr:hover {
   bottom: 7px;
   width: 3px;
   border-radius: 3px;
-  background: var(--primary);
+  background: var(--sidebar-primary);
 }
 
 /* ---------- Room map (signature element) ---------- */
@@ -399,18 +401,19 @@ tbody tr:hover {
 }
 .room-cell {
   position: relative;
-  border: 1px solid var(--border);
-  border-radius: 11px;
+  border: 1px solid var(--shadcn-border);
+  border-radius: calc(var(--radius-shadcn) + 1px);
   padding: 11px 10px 9px;
   display: flex;
   flex-direction: column;
   gap: 2px;
   align-items: flex-start;
-  background: var(--card-bg);
+  background: var(--card);
   cursor: pointer;
   transition: border-color 130ms ease, background-color 130ms ease, transform 130ms ease, box-shadow 130ms ease;
   font-family: inherit;
   text-align: left;
+  color: var(--foreground);
 }
 .room-cell:hover {
   border-color: var(--border-strong);
@@ -418,11 +421,11 @@ tbody tr:hover {
   box-shadow: var(--shadow-card);
 }
 .room-cell[data-status="terisi"] {
-  background: linear-gradient(160deg, var(--primary-soft), color-mix(in srgb, var(--primary) 14%, var(--card-bg)));
-  border-color: color-mix(in srgb, var(--primary) 38%, var(--border));
+  background: linear-gradient(160deg, color-mix(in srgb, var(--primary) 8%, var(--card)), color-mix(in srgb, var(--primary) 14%, var(--card)));
+  border-color: color-mix(in srgb, var(--primary) 38%, var(--shadcn-border));
 }
 .room-cell[data-tagihan="telat"] {
-  border-color: color-mix(in srgb, var(--danger) 45%, var(--border));
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--shadcn-border));
   box-shadow: inset 3px 0 0 var(--danger);
 }
 .room-cell[data-tagihan="telat"]::after {
@@ -430,7 +433,7 @@ tbody tr:hover {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 18%, transparent);
 }
 .room-cell[data-tagihan="belum"] {
-  border-color: color-mix(in srgb, var(--warning) 45%, var(--border));
+  border-color: color-mix(in srgb, var(--warning) 45%, var(--shadcn-border));
   box-shadow: inset 3px 0 0 var(--warning);
 }
 .room-cell[data-tagihan="belum"]::after {
@@ -446,7 +449,7 @@ tbody tr:hover {
   height: 7px;
   border-radius: 999px;
   background: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent);
 }
 .room-cell[data-selected="true"] {
   outline: 2px solid var(--primary);
@@ -456,24 +459,24 @@ tbody tr:hover {
 /* ---------- Segmented control ---------- */
 .segmented {
   display: inline-flex;
-  background: var(--surface-2);
-  border-radius: 11px;
+  background: var(--muted);
+  border-radius: calc(var(--radius-shadcn) - 1px);
   padding: 3px;
   gap: 2px;
 }
 .segmented button {
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: calc(var(--radius-shadcn) - 4px);
   padding: 6px 14px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-muted);
+  color: var(--muted-foreground);
   cursor: pointer;
 }
 .segmented button[data-active="true"] {
-  background: var(--card-bg);
-  color: var(--text);
+  background: var(--card);
+  color: var(--foreground);
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), var(--shadow-kpi);
 }

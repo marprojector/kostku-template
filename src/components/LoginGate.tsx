@@ -68,13 +68,13 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
           <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 6 }}>
             <div className="kostku-brandmark" aria-hidden="true">K</div>
             <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 21, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1 }}>
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 21, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1, color: "var(--foreground)" }}>
                 <span style={{ color: "var(--primary)" }}>Kost</span>Ku
               </div>
-              <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 1 }}>Kos Perajin</div>
+              <div style={{ fontSize: 11.5, color: "var(--muted-foreground)", marginTop: 1 }}>Kos Perajin</div>
             </div>
           </div>
-          <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 22 }}>
+          <div style={{ fontSize: 13, color: "var(--muted-foreground)", marginBottom: 22 }}>
             Masuk untuk mengelola Kos Perajin
           </div>
 
@@ -106,10 +106,11 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
               <div
                 role="alert"
                 style={{
-                  background: "var(--danger-bg)",
-                  color: "var(--danger)",
+                  background: "color-mix(in srgb, var(--destructive) 12%, transparent)",
+                  color: "var(--destructive)",
+                  border: "1px solid color-mix(in srgb, var(--destructive) 30%, transparent)",
                   padding: "9px 12px",
-                  borderRadius: 8,
+                  borderRadius: "var(--radius-shadcn)",
                   fontSize: 13,
                   marginBottom: 12,
                 }}
@@ -140,6 +141,6 @@ const labelStyle = {
   display: "block",
   fontSize: 12.5,
   fontWeight: 600,
-  color: "var(--text-muted)",
+  color: "var(--muted-foreground)",
   marginBottom: 5,
 } as const;

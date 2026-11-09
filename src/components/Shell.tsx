@@ -91,8 +91,8 @@ export function Shell() {
         style={{
           width: "var(--sidebar-w)",
           flexShrink: 0,
-          background: "var(--card-bg)",
-          borderRight: "1px solid var(--border)",
+          background: "var(--sidebar)",
+          borderRight: "1px solid var(--sidebar-border)",
           display: "flex",
           flexDirection: "column",
           position: "fixed",
@@ -100,14 +100,14 @@ export function Shell() {
           zIndex: 40,
         }}
       >
-        <div style={{ padding: "18px 18px 16px", borderBottom: "1px solid var(--border)" }}>
+        <div style={{ padding: "18px 18px 16px", borderBottom: "1px solid var(--sidebar-border)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div className="kostku-brandmark" aria-hidden="true">K</div>
             <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 16.5, fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.15 }}>
-                <span style={{ color: "var(--primary)" }}>Kost</span>Ku
+              <div style={{ fontFamily: "var(--font-display)", fontSize: 16.5, fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.15, color: "var(--sidebar-foreground)" }}>
+                <span style={{ color: "var(--sidebar-primary)" }}>Kost</span>Ku
               </div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 1 }}>Kos Perajin</div>
+              <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>Kos Perajin</div>
             </div>
           </div>
         </div>
@@ -121,7 +121,7 @@ export function Shell() {
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "0.09em",
-                  color: "var(--text-faint)",
+                  color: "var(--muted-foreground)",
                   padding: "12px 8px 6px",
                 }}
               >
@@ -147,7 +147,7 @@ export function Shell() {
           ))}
         </nav>
 
-        <div style={{ padding: 12, borderTop: "1px solid var(--border)" }}>
+        <div style={{ padding: 12, borderTop: "1px solid var(--sidebar-border)" }}>
           <div style={{ display: "grid", gap: 8 }}>
             <button
               onClick={toggle}
@@ -158,10 +158,10 @@ export function Shell() {
                 gap: 9,
                 width: "100%",
                 padding: "9px 10px",
-                borderRadius: 8,
-                border: "1px solid var(--border)",
-                background: "var(--bg)",
-                color: "var(--text)",
+                borderRadius: "var(--radius-shadcn)",
+                border: "1px solid var(--sidebar-border)",
+                background: "var(--sidebar)",
+                color: "var(--sidebar-foreground)",
                 cursor: "pointer",
                 fontSize: 13,
                 fontWeight: 500,
@@ -199,10 +199,10 @@ export function Shell() {
                 gap: 9,
                 width: "100%",
                 padding: "9px 10px",
-                borderRadius: 8,
+                borderRadius: "var(--radius-shadcn)",
                 border: "1px solid transparent",
                 background: "transparent",
-                color: "var(--text-muted)",
+                color: "var(--muted-foreground)",
                 cursor: "pointer",
                 fontSize: 13,
                 fontWeight: 500,
@@ -231,8 +231,8 @@ export function Shell() {
             alignItems: "center",
             gap: 12,
             padding: "0 20px",
-            background: "var(--card-bg)",
-            borderBottom: "1px solid var(--border)",
+            background: "var(--sidebar)",
+            borderBottom: "1px solid var(--sidebar-border)",
             position: "sticky",
             top: 0,
             zIndex: 20,
@@ -246,10 +246,10 @@ export function Shell() {
             style={{
               display: "none",
               padding: 8,
-              border: "1px solid var(--border)",
-              borderRadius: 8,
+              border: "1px solid var(--sidebar-border)",
+              borderRadius: "var(--radius-shadcn)",
               background: "transparent",
-              color: "var(--text)",
+              color: "var(--sidebar-foreground)",
               cursor: "pointer",
             }}
           >
@@ -272,8 +272,8 @@ export function Shell() {
               style={{
                 fontSize: 12,
                 fontWeight: 600,
-                color: "var(--text-muted)",
-                background: "var(--surface-2)",
+                color: "var(--muted-foreground)",
+                background: "var(--muted)",
                 padding: "5px 12px",
                 borderRadius: 999,
                 whiteSpace: "nowrap",
@@ -282,7 +282,7 @@ export function Shell() {
               {NAV.flatMap((g) => g.items).find((i) => i.id === page)?.label ?? ""}
             </div>
           )}
-          <div style={{ fontSize: 12.5, color: "var(--text-muted)", whiteSpace: "nowrap" }} suppressHydrationWarning>
+          <div style={{ fontSize: 12.5, color: "var(--muted-foreground)", whiteSpace: "nowrap" }} suppressHydrationWarning>
             {tanggal}
           </div>
         </header>
