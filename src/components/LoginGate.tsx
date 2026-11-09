@@ -87,11 +87,10 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
-            <span style={{ background: "#fff", borderRadius: 9, padding: 5, display: "inline-flex", boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
+            <span style={{ background: "#fff", borderRadius: 9, padding: "7px 10px", display: "inline-flex", boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Logo KostKu" style={{ height: 30, width: "auto", borderRadius: 5 }} />
+              <img src="/logo.png" alt="KostKu" style={{ height: 26, width: "auto" }} />
             </span>
-            <div style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, letterSpacing: "-0.02em" }}>KostKu</div>
           </div>
           <div>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 34, fontWeight: 700, lineHeight: 1.15, letterSpacing: "-0.03em", maxWidth: 420 }}>
@@ -123,14 +122,9 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
           <div className="kostku-fade-up" style={{ width: "100%", maxWidth: 380 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 26 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="Logo KostKu" style={{ height: 40, width: "auto", borderRadius: 8 }} />
-              <div>
-                <div style={{ fontFamily: "var(--font-display)", fontSize: 19, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.1, color: "var(--foreground)" }}>
-                  KostKu
-                </div>
-                <div style={{ fontSize: 11.5, color: "var(--muted-foreground)", marginTop: 2 }}>
-                  {identitas.namaKos}
-                </div>
+              <img src="/logo.png" alt="KostKu" style={{ height: 36, width: "auto" }} />
+              <div style={{ fontSize: 11.5, color: "var(--muted-foreground)" }}>
+                {identitas.namaKos}
               </div>
             </div>
 
