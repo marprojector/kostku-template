@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { requireJson, rateLimit, sanitizeString } from "@/lib/security";
+import { normalizeKategori, readKategoriRaw, type KategoriItem } from "@/lib/kategori";
+
+export type { KategoriItem };
 
 const ALLOWED_KEYS: Record<string, true> = {
   nama_kos: true,
   alamat: true,
   nama_pemilik: true,
   kategori_pengeluaran: true,
-  auto_bayar: true,
   rename_kategori: true, // pseudo-key khusus PUT: ganti nama kategori + update transaksi
 };
 
@@ -21,7 +23,8 @@ export async function GET(req: NextRequest) {
   for (const row of rows) {
     if (!ALLOWED_KEYS[row.key]) continue;
     try {
-      result[row.key] = JSON.parse(row.value) as unknown;
+      const parsed = JSON.parse(row.value) as unknown;
+      result[row.key] = row.key === "kategori_pengeluaran" ? normalizeKategori(parsed) : parsed;
     } catch {
       result[row.key] = row.value;
     }
@@ -57,41 +60,46 @@ export async function PUT(req: NextRequest) {
     const dariS = sanitizeString(dari, 80);
     const keS = sanitizeString(ke, 80);
     if (!dariS || !keS) return NextResponse.json({ error: "Field 'dari' dan 'ke' wajib" }, { status: 400 });
-    if (dariS === keS) return NextResponse.json({ ok: true, kategori_pengeluaran: [] });
+    if (dariS === keS) {
+      const current = normalizeKategori(readKategoriRaw(getDb()));
+      return NextResponse.json({ ok: true, kategori_pengeluaran: current });
+    }
 
     const db = getDb();
-    const row = db.prepare("SELECT value FROM settings WHERE key = 'kategori_pengeluaran'").get() as { value: string } | undefined;
-    let kategori: string[] = [];
-    if (row) {
-      try { kategori = JSON.parse(row.value) as string[]; } catch { kategori = []; }
-    }
-    const idx = kategori.indexOf(dariS);
+    const kategori = normalizeKategori(readKategoriRaw(db));
+    const idx = kategori.findIndex((k) => k.nama === dariS);
     if (idx === -1) return NextResponse.json({ error: "Kategori tidak ditemukan" }, { status: 404 });
-    if (kategori.includes(keS)) return NextResponse.json({ error: "Kategori tujuan sudah ada" }, { status: 400 });
+    if (kategori.some((k) => k.nama === keS)) return NextResponse.json({ error: "Kategori tujuan sudah ada" }, { status: 400 });
 
-    kategori[idx] = keS;
+    kategori[idx] = { ...kategori[idx], nama: keS };
     const rename = db.transaction(() => {
       db.prepare(
         "INSERT OR REPLACE INTO settings (key, value, updated_at) VALUES ('kategori_pengeluaran', ?, datetime('now'))"
       ).run(JSON.stringify(kategori));
-      db.prepare("UPDATE transaksi SET kategori = ? WHERE kategori = ?").run(ke, dari);
+      db.prepare("UPDATE transaksi SET kategori = ? WHERE kategori = ?").run(keS, dariS);
     });
     rename();
     return NextResponse.json({ ok: true, kategori_pengeluaran: kategori });
   }
 
-  let parsedValue: string | string[] | boolean;
+  let parsedValue: string | KategoriItem[];
   if (key === "kategori_pengeluaran") {
-    if (!Array.isArray(input.value) || input.value.some((item) => typeof item !== "string")) {
-      return NextResponse.json({ error: "Kategori harus berupa array teks" }, { status: 400 });
+    if (!Array.isArray(input.value)) {
+      return NextResponse.json({ error: "Kategori harus berupa array" }, { status: 400 });
     }
-    parsedValue = input.value
-      .map((item) => sanitizeString(item, 80))
-      .filter((item): item is string => item !== null)
-      .slice(0, 100);
-  } else if (key === "auto_bayar") {
-    const flag = typeof input.value === "boolean" ? input.value : input.value === "true" || input.value === 1 || input.value === "1";
-    parsedValue = flag;
+    const items: KategoriItem[] = [];
+    const seen = new Set<string>();
+    for (const raw of input.value) {
+      const o = (raw ?? {}) as Record<string, unknown>;
+      const nama = typeof o.nama === "string" ? sanitizeString(o.nama, 80) : null;
+      if (!nama || seen.has(nama)) continue;
+      const hargaRaw = typeof o.harga === "number" ? o.harga : Number(o.harga);
+      const harga = Number.isSafeInteger(hargaRaw) && hargaRaw >= 0 ? hargaRaw : 0;
+      const mode = o.mode === "otomatis" ? "otomatis" : "manual";
+      seen.add(nama);
+      items.push({ nama, harga, mode });
+    }
+    parsedValue = items.slice(0, 100);
   } else {
     const value = sanitizeString(input.value, 500);
     if (!value) return NextResponse.json({ error: "Nilai setting tidak valid" }, { status: 400 });

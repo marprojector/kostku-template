@@ -371,7 +371,7 @@ export async function updatePengaturan(key: string, value: unknown): Promise<{ o
   return json;
 }
 
-export async function renameKategori(dari: string, ke: string): Promise<{ ok: boolean; kategori_pengeluaran?: string[] }> {
+export async function renameKategori(dari: string, ke: string): Promise<{ ok: boolean; kategori_pengeluaran?: unknown[] }> {
   const res = await fetch("/api/pengaturan?key=rename_kategori", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },

@@ -4,11 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, SectionTitle, Skeleton } from "@/components/ui";
 import { createTransaksi, deleteTransaksi, fetchTransaksi, formatRupiah, updateTransaksi, type Transaksi } from "@/lib/api";
 import { tanggalPendek } from "@/lib/format";
+import { normalizeKategori, type KategoriItem } from "@/lib/kategori";
 import { useApi } from "@/lib/useApi";
 import { useBulanIni } from "@/lib/useNow";
 
 const EMPTY_TRANSAKSI: Transaksi[] = [];
-const EMPTY_KATEGORI: string[] = [];
+const EMPTY_KATEGORI: KategoriItem[] = [];
+const KATEGORI_PEMASUKAN = ["Sewa", "Deposit", "Lainnya"];
 
 interface FormTransaksi {
   tipe: "pemasukan" | "pengeluaran";
@@ -27,7 +29,7 @@ export function TransaksiPage() {
   const { data, loading, error, reload } = useApi<Transaksi[]>(() => fetchTransaksi());
   const [tipeFilter, setTipeFilter] = useState<"semua" | "pemasukan" | "pengeluaran">("semua");
   const [q, setQ] = useState("");
-  const [kategori, setKategori] = useState<string[]>(EMPTY_KATEGORI);
+  const [kategori, setKategori] = useState<KategoriItem[]>(EMPTY_KATEGORI);
   const [form, setForm] = useState<FormTransaksi>(formKosong);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formErr, setFormErr] = useState<string | null>(null);
@@ -36,13 +38,31 @@ export function TransaksiPage() {
   useEffect(() => {
     fetch("/api/pengaturan", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((j: { kategori_pengeluaran?: string[] } | null) => {
-        if (j?.kategori_pengeluaran) setKategori(j.kategori_pengeluaran);
+      .then((j: { kategori_pengeluaran?: unknown } | null) => {
+        if (j?.kategori_pengeluaran) setKategori(normalizeKategori(j.kategori_pengeluaran));
       })
       .catch(() => {});
   }, []);
 
-  const pilihKategori = form.kategori || kategori[0] || "";
+  /** Opsi kategori sesuai tipe: pengeluaran dari settings, pemasukan tetap. */
+  function opsiKategori(tipe: FormTransaksi["tipe"]): string[] {
+    return tipe === "pengeluaran" ? kategori.map((k) => k.nama) : KATEGORI_PEMASUKAN;
+  }
+
+  const pilihKategori = form.kategori || opsiKategori(form.tipe)[0] || "";
+
+  /** Pilih kategori: isi nominal dari harga default (bisa diedit = "ganti harga"). */
+  function gantiKategori(nama: string) {
+    setForm((f) => {
+      const harga = kategori.find((k) => k.nama === nama)?.harga ?? 0;
+      const isiHarga = harga > 0 && (!f.nominal || Number(f.nominal.replace(/[^\d]/g, "")) === 0);
+      return { ...f, kategori: nama, nominal: isiHarga ? String(harga) : f.nominal };
+    });
+  }
+
+  function gantiTipe(tipe: FormTransaksi["tipe"]) {
+    setForm((f) => ({ ...f, tipe, kategori: "" }));
+  }
 
   function resetForm() {
     setForm(formKosong());
@@ -52,7 +72,6 @@ export function TransaksiPage() {
 
   async function simpanForm() {
     const nominal = Number(form.nominal.replace(/[^\d]/g, ""));
-    if (!form.kategori && kategori.length > 0) setForm((f) => ({ ...f, kategori: kategori[0] }));
     setFormErr(null);
     if (!pilihKategori) {
       setFormErr("Pilih atau isi kategori dulu.");
@@ -169,22 +188,19 @@ export function TransaksiPage() {
           {editingId !== null ? "Edit Transaksi" : "Catat Transaksi"}
         </SectionTitle>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
-          <div className="segmented" role="tablist" aria-label="Tipe transaksi">
-            {([
-              ["pemasukan", "Pemasukan"],
-              ["pengeluaran", "Pengeluaran"],
-            ] as const).map(([val, lbl]) => (
-              <button
-                key={val}
-                type="button"
-                data-active={form.tipe === val}
-                onClick={() => setForm((f) => ({ ...f, tipe: val }))}
-                role="tab"
-                aria-selected={form.tipe === val}
-              >
-                {lbl}
-              </button>
-            ))}
+          <div>
+            <label htmlFor="trx-tipe" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
+              Jenis
+            </label>
+            <select
+              id="trx-tipe"
+              value={form.tipe}
+              onChange={(e) => gantiTipe(e.target.value as FormTransaksi["tipe"])}
+              style={{ width: "100%" }}
+            >
+              <option value="pengeluaran">Pengeluaran</option>
+              <option value="pemasukan">Pemasukan</option>
+            </select>
           </div>
           <div>
             <label htmlFor="trx-kategori" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
@@ -193,14 +209,14 @@ export function TransaksiPage() {
             <select
               id="trx-kategori"
               value={pilihKategori}
-              onChange={(e) => setForm((f) => ({ ...f, kategori: e.target.value }))}
+              onChange={(e) => gantiKategori(e.target.value)}
               style={{ width: "100%" }}
             >
-              {kategori.length === 0 && <option value="">— isi manual —</option>}
-              {kategori.map((k) => (
+              {opsiKategori(form.tipe).length === 0 && <option value="">— isi manual —</option>}
+              {opsiKategori(form.tipe).map((k) => (
                 <option key={k} value={k}>{k}</option>
               ))}
-              {form.kategori && !kategori.includes(form.kategori) && (
+              {form.kategori && !opsiKategori(form.tipe).includes(form.kategori) && (
                 <option value={form.kategori}>{form.kategori}</option>
               )}
             </select>

@@ -27,17 +27,8 @@ export function Shell() {
   const [tanggal, setTanggal] = useState("");
 
   useEffect(() => {
-    // Otomatis bayar bulanan (opt-in di Pengaturan): sekali per periode
-    fetch("/api/pengaturan", { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then(async (j: { auto_bayar?: boolean } | null) => {
-        if (!j || j.auto_bayar !== true) return;
-        const periode = new Date().toISOString().slice(0, 7);
-        if (localStorage.getItem("kostku-autobayar") === periode) return;
-        const res = await fetch(`/api/tagihan/bayar-semua?periode=${periode}`, { method: "POST" });
-        if (res.ok) localStorage.setItem("kostku-autobayar", periode);
-      })
-      .catch(() => {});
+    // Posting pengeluaran rutin (kategori mode "otomatis") — idempoten per periode di server
+    fetch("/api/pengeluaran/otomatis", { method: "POST" }).catch(() => {});
   }, []);
 
   useEffect(() => {
