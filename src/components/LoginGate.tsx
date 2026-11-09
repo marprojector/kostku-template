@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui";
+import { KostKuLogo } from "@/components/KostKuLogo";
 import { BedDouble, Receipt, TrendingUp } from "lucide-react";
 import { useIdentitas } from "@/lib/identitas";
 
@@ -87,9 +88,8 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
-            <span style={{ background: "#fff", borderRadius: 9, padding: "7px 10px", display: "inline-flex", boxShadow: "0 2px 8px rgba(0,0,0,0.12)" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="KostKu" style={{ height: 26, width: "auto" }} />
+            <span style={{ background: "#fff", borderRadius: 10, padding: "10px 14px", display: "inline-flex", boxShadow: "0 2px 10px rgba(0,0,0,0.14)" }}>
+              <KostKuLogo variant="full" height={36} />
             </span>
           </div>
           <div>
@@ -120,18 +120,17 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
         {/* Form */}
         <main style={{ display: "grid", placeItems: "center", padding: "24px 20px" }}>
           <div className="kostku-fade-up" style={{ width: "100%", maxWidth: 380 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 26 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="KostKu" style={{ height: 36, width: "auto" }} />
-              <div style={{ fontSize: 11.5, color: "var(--muted-foreground)" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, marginBottom: 24, textAlign: "center" }}>
+              <KostKuLogo variant="full" height={44} />
+              <div style={{ fontSize: 12, color: "var(--muted-foreground)" }}>
                 {identitas.namaKos}
               </div>
             </div>
 
-            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 700, letterSpacing: "-0.02em", margin: "0 0 6px", color: "var(--foreground)" }}>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, letterSpacing: "-0.02em", margin: "0 0 6px", color: "var(--foreground)", textAlign: "center" }}>
               Masuk ke akun Anda
             </h1>
-            <p style={{ fontSize: 13.5, color: "var(--muted-foreground)", margin: "0 0 22px" }}>
+            <p style={{ fontSize: 13.5, color: "var(--muted-foreground)", margin: "0 0 22px", textAlign: "center" }}>
               Lanjutkan mengelola {identitas.namaKos}.
             </p>
 

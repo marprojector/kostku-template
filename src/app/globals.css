@@ -215,6 +215,20 @@ h1, h2, h3 {
   font-feature-settings: "tnum";
 }
 
+/* ---------- Logo brand: swap light/dark ---------- */
+.kostku-logo-light {
+  display: block;
+}
+.kostku-logo-dark {
+  display: none;
+}
+[data-theme="dark"] .kostku-logo-light {
+  display: none;
+}
+[data-theme="dark"] .kostku-logo-dark {
+  display: block;
+}
+
 /* ---------- Focus ---------- */
 :focus-visible {
   outline: 2px solid var(--ring, var(--primary));

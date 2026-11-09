@@ -20,6 +20,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { NAV, type PageId } from "@/components/nav";
+import { KostKuLogo } from "@/components/KostKuLogo";
 import { Dashboard } from "@/components/pages/Dashboard";
 import { ModernDashboard } from "@/components/pages/ModernDashboard";
 import { DatabaseKamar } from "@/components/pages/DatabaseKamar";
@@ -210,8 +211,7 @@ export function Shell() {
         aria-label="Navigasi utama"
       >
         <div style={{ padding: "14px 14px 12px", borderBottom: "1px solid var(--sidebar-border)", display: "flex", alignItems: "center", gap: 10 }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="KostKu" style={{ height: 40, width: "auto", flexShrink: 0 }} />
+          <KostKuLogo variant="compact" height={38} />
           <div className="kostku-brand-text" style={{ minWidth: 0 }}>
             <div style={{ fontSize: 11, color: "var(--muted-foreground)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={identitas.alamat || undefined}>
               {identitas.namaKos}
@@ -300,8 +300,7 @@ export function Shell() {
           {/* Brand (mobile) / breadcrumb (desktop) */}
           <div className="kostku-breadcrumb">
             <span className="crumb-brand" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo.png" alt="KostKu" style={{ height: 26, width: "auto" }} />
+              <KostKuLogo variant="compact" height={24} />
             </span>
             <span className="crumb-page" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
               <ChevronDown size={13} style={{ transform: "rotate(-90deg)", opacity: 0.6 }} />
