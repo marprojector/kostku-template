@@ -1,7 +1,7 @@
-@import "tailwindcss";
-
 /* Fonts: Plus Jakarta Sans (display) + Inter (body) + JetBrains Mono (code) */
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap");
+
+@import "tailwindcss";
 
 /* =========================================================
    DESIGN TOKENS — "Editorial Indigo"
@@ -85,6 +85,113 @@
 
 * {
   box-sizing: border-box;
+}
+
+/* =========================================================
+   SHADCN TOKENS — aliaskan ke design system KostKu
+   Agar komponen shadcn/ui (Tailwind v4) pakai warna tema ini.
+   ========================================================= */
+:root,
+[data-theme="light"] {
+  --background: #eef0f6;
+  --foreground: #191d28;
+  --card: #ffffff;
+  --card-foreground: #191d28;
+  --popover: #ffffff;
+  --popover-foreground: #191d28;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f3f7;
+  --secondary-foreground: #191d28;
+  --muted: #f2f3f7;
+  --muted-foreground: #5d6577;
+  --accent: #eef2ff;
+  --accent-foreground: #4f46e5;
+  --destructive: #e02424;
+  --destructive-foreground: #ffffff;
+  --shadcn-border: #e4e7ee;
+  --input: #e4e7ee;
+  --ring: #4f46e5;
+  --radius-shadcn: 0.75rem;
+  --chart-1: #4f46e5;
+  --chart-2: #0ea5e9;
+  --chart-3: #0e9f6e;
+  --chart-4: #c27803;
+  --chart-5: #e02424;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #191d28;
+  --sidebar-primary: #4f46e5;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef2ff;
+  --sidebar-accent-foreground: #4f46e5;
+  --sidebar-border: #e4e7ee;
+  --sidebar-ring: #4f46e5;
+}
+
+[data-theme="dark"] {
+  --background: #08090d;
+  --foreground: #e9ebf3;
+  --card: #15171e;
+  --card-foreground: #e9ebf3;
+  --popover: #15171e;
+  --popover-foreground: #e9ebf3;
+  --primary: #818cf8;
+  --primary-foreground: #0b0c12;
+  --secondary: #1c1f28;
+  --secondary-foreground: #e9ebf3;
+  --muted: #1c1f28;
+  --muted-foreground: #949db3;
+  --accent: #1e2242;
+  --accent-foreground: #a5b0ff;
+  --destructive: #f87171;
+  --destructive-foreground: #0b0c12;
+  --shadcn-border: #232733;
+  --input: #232733;
+  --ring: #818cf8;
+  --chart-1: #818cf8;
+  --chart-2: #38bdf8;
+  --chart-3: #34d399;
+  --chart-4: #fbbf24;
+  --chart-5: #f87171;
+  --sidebar: #101218;
+  --sidebar-foreground: #e9ebf3;
+  --sidebar-primary: #818cf8;
+  --sidebar-primary-foreground: #0b0c12;
+  --sidebar-accent: #1e2242;
+  --sidebar-accent-foreground: #a5b0ff;
+  --sidebar-border: #232733;
+  --sidebar-ring: #818cf8;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--shadcn-border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius-shadcn) - 4px);
+  --radius-md: calc(var(--radius-shadcn) - 2px);
+  --radius-lg: var(--radius-shadcn);
+  --radius-xl: calc(var(--radius-shadcn) + 4px);
 }
 
 html,

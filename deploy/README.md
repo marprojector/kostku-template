@@ -4,7 +4,7 @@
 
 ```bash
 cp .env.production.example .env.production
-# edit .env.production: AUTH_SECRET, OWNER_EMAIL, OWNER_PASSWORD
+# edit .env.production: AUTH_SECRET, OWNER_USERNAME, OWNER_PASSWORD
 chmod 600 .env.production
 openssl rand -base64 32
 

@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   const semua = searchParams.get("semua") === "1";
 
   let rows = db.prepare(`
-    SELECT t.*, p.nama as nama_penyewa, p.no_wa, k.nomor as kamar_nomor
+    SELECT t.*, p.nama as nama_penyewa, p.no_wa, p.id as penyewa_id, k.nomor as kamar_nomor
     FROM tagihan t
     JOIN kontrak_sewa ks ON ks.id = t.kontrak_id
     JOIN penyewa p ON p.id = ks.penyewa_id

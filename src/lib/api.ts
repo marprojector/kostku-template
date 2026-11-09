@@ -39,6 +39,7 @@ export interface TagihanDetail extends Tagihan {
   nama_penyewa: string;
   no_wa: string;
   kamar_nomor: string;
+  penyewaId: number;
 }
 
 export interface LaporanBulanan {
@@ -112,6 +113,7 @@ interface RawTagihan {
   nama_penyewa: string;
   no_wa: string;
   kamar_nomor: string;
+  penyewa_id: number | null;
 }
 
 interface RawTransaksi {
@@ -218,6 +220,7 @@ export async function fetchTagihan(params?: {
     nama_penyewa: r.nama_penyewa,
     no_wa: r.no_wa,
     kamar_nomor: r.kamar_nomor,
+    penyewaId: r.penyewa_id ?? 0,
   }));
 }
 
@@ -266,6 +269,7 @@ export async function fetchDashboard(tanggal?: string): Promise<DashboardStats> 
     nama_penyewa: r.nama_penyewa,
     no_wa: r.no_wa,
     kamar_nomor: r.kamar_nomor,
+    penyewaId: r.penyewa_id ?? 0,
   });
 
   return {

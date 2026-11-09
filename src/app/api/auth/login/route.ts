@@ -10,7 +10,7 @@ function getSecret(): Uint8Array | null {
 // POST /api/auth/login
 export async function POST(req: NextRequest) {
   const secret = getSecret();
-  if (!secret || !process.env.OWNER_EMAIL || !process.env.OWNER_PASSWORD) {
+  if (!secret || !process.env.OWNER_USERNAME || !process.env.OWNER_PASSWORD) {
     return NextResponse.json({ error: "Konfigurasi server tidak lengkap" }, { status: 503 });
   }
 
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
   const email = sanitizeString(input.email, 320);
   const password = typeof input.password === "string" ? input.password : null;
 
-  if (!email || !password || email !== process.env.OWNER_EMAIL || password !== process.env.OWNER_PASSWORD) {
+  if (!email || !password || email !== process.env.OWNER_USERNAME || password !== process.env.OWNER_PASSWORD) {
     return NextResponse.json({ error: "Email atau password salah" }, { status: 401 });
   }
 

@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
 
   // Hitung jatuh tempo 30 hari ke depan
   const jatuhTempo = db.prepare(`
-    SELECT t.*, p.nama as nama_penyewa, p.no_wa, k.nomor as kamar_nomor
+    SELECT t.*, p.nama as nama_penyewa, p.no_wa, p.id as penyewa_id, k.nomor as kamar_nomor
     FROM tagihan t
     JOIN kontrak_sewa ks ON ks.id = t.kontrak_id
     JOIN penyewa p ON p.id = ks.penyewa_id
@@ -64,7 +64,7 @@ export async function GET(req: NextRequest) {
 
   // Tagihan lewat (jatuh tempo sebelum sekarang)
   const lewat = db.prepare(`
-    SELECT t.*, p.nama as nama_penyewa, p.no_wa, k.nomor as kamar_nomor
+    SELECT t.*, p.nama as nama_penyewa, p.no_wa, p.id as penyewa_id, k.nomor as kamar_nomor
     FROM tagihan t
     JOIN kontrak_sewa ks ON ks.id = t.kontrak_id
     JOIN penyewa p ON p.id = ks.penyewa_id
@@ -157,8 +157,8 @@ export async function GET(req: NextRequest) {
       };
     }),
     tagihan: {
-      belumLunas: totalTagihan.total,
-      totalBelumLunas: belumLunas.c,
+      belumLunas: belumLunas.c,
+      totalBelumLunas: totalTagihan.total,
     },
     jatuhTempo,
     lewat,

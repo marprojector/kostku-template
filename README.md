@@ -18,7 +18,7 @@ Dokumen produk lengkap: [`PRD.md`](./PRD.md).
 
 ```bash
 npm install
-cp .env.example .env.local   # isi AUTH_SECRET, OWNER_EMAIL, OWNER_PASSWORD
+cp .env.example .env.local   # isi AUTH_SECRET, OWNER_USERNAME, OWNER_PASSWORD
 npm run dev                  # http://localhost:3000
 ```
 
@@ -35,7 +35,7 @@ npm run start
 
 ## Kredensial
 
-Login memakai `OWNER_EMAIL` / `OWNER_PASSWORD` dari environment. Default pengembangan ada di `.env.example`; **wajib diganti sebelum production**.
+Login memakai `OWNER_USERNAME` / `OWNER_PASSWORD` dari environment. Default pengembangan ada di `.env.example`; **wajib diganti sebelum production**.
 
 ## Struktur
 
@@ -120,7 +120,7 @@ Semua endpoint `/api/*` dilindungi JWT cookie kecuali `auth/login`, `auth/logout
 
 Runtime protections included:
 
-- Production refuses the development JWT fallback; `AUTH_SECRET`, `OWNER_EMAIL`, and `OWNER_PASSWORD` are required.
+- Production refuses the development JWT fallback; `AUTH_SECRET`, `OWNER_USERNAME`, and `OWNER_PASSWORD` are required.
 - Login requests are rate-limited per IP on a single-server deployment.
 - JSON mutation requests, IDs, money fields, dates, and setting keys are validated.
 - Check-in runs in one SQLite transaction; payment and checkout reject duplicate/inactive operations.

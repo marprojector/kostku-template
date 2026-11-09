@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 export type PageId =
   | "dashboard"
+  | "modern"
   | "database"
   | "input-sewa"
   | "tagihan"
@@ -28,6 +29,7 @@ export const NAV: Group[] = [
     title: "Operasional",
     items: [
       { id: "dashboard", label: "Menu Utama" },
+      { id: "modern", label: "Dashboard Modern" },
       { id: "database", label: "Database Kamar" },
       { id: "input-sewa", label: "Check-In Penyewa" },
     ],
@@ -52,6 +54,14 @@ export const NAV: Group[] = [
 
 /* Inline SVG icons — 18px, 1.6 stroke, currentColor */
 const ICONS: Record<PageId, ReactNode> = {
+  modern: (
+    <>
+      <rect x="2.5" y="2.5" width="6" height="6" rx="1.5" />
+      <rect x="9.5" y="2.5" width="6" height="6" rx="1.5" />
+      <rect x="2.5" y="9.5" width="6" height="6" rx="1.5" />
+      <rect x="9.5" y="9.5" width="6" height="6" rx="1.5" />
+    </>
+  ),
   dashboard: (
     <>
       <rect x="2.5" y="2.5" width="5.5" height="5.5" rx="1.4" />

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { NAV, NavIcon, type PageId } from "@/components/nav";
 import { Dashboard } from "@/components/pages/Dashboard";
+import { ModernDashboard } from "@/components/pages/ModernDashboard";
 import { DatabaseKamar } from "@/components/pages/DatabaseKamar";
 import { CheckIn } from "@/components/pages/CheckIn";
 import { Tagihan } from "@/components/pages/Tagihan";
@@ -43,6 +44,8 @@ export function Shell() {
     switch (page) {
       case "dashboard":
         return <Dashboard onSelectPenyewa={handleSelectPenyewa} />;
+      case "modern":
+        return <ModernDashboard onSelectPenyewa={handleSelectPenyewa} />;
       case "database":
         return <DatabaseKamar onSelectPenyewa={handleSelectPenyewa} />;
       case "input-sewa":

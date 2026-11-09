@@ -80,10 +80,10 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
 
           <form onSubmit={submit}>
             <div style={{ marginBottom: 12 }}>
-              <label htmlFor="login-email" style={labelStyle}>Email</label>
+              <label htmlFor="login-email" style={labelStyle}>Username</label>
               <input
                 id="login-email"
-                type="email"
+                type="text"
                 autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -126,7 +126,7 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
           <div style={{ fontSize: 11.5, color: "var(--text-muted)", marginTop: 16, lineHeight: 1.7 }}>
             Kredensial diatur lewat environment variable
             <br />
-            <code style={{ fontSize: 11 }}>OWNER_EMAIL</code> dan <code style={{ fontSize: 11 }}>OWNER_PASSWORD</code>.
+            <code style={{ fontSize: 11 }}>OWNER_USERNAME</code> dan <code style={{ fontSize: 11 }}>OWNER_PASSWORD</code>.
           </div>
         </Card>
       </div>
