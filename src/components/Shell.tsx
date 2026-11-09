@@ -210,7 +210,8 @@ export function Shell() {
         aria-label="Navigasi utama"
       >
         <div style={{ padding: "14px 14px 12px", borderBottom: "1px solid var(--sidebar-border)", display: "flex", alignItems: "center", gap: 10 }}>
-          <div className="kostku-brandmark" aria-hidden="true">K</div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Logo KostKu" style={{ height: 38, width: "auto", borderRadius: 8, flexShrink: 0 }} />
           <div className="kostku-brand-text" style={{ minWidth: 0, flex: 1 }}>
             <div style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.15, color: "var(--sidebar-foreground)" }}>
               <span style={{ color: "var(--primary)" }}>Kost</span>Ku
@@ -302,7 +303,8 @@ export function Shell() {
           {/* Brand (mobile) / breadcrumb (desktop) */}
           <div className="kostku-breadcrumb">
             <span className="crumb-brand" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-              <span className="kostku-brandmark" style={{ width: 26, height: 26, fontSize: 12, borderRadius: 7 }} aria-hidden="true">K</span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="Logo KostKu" style={{ height: 26, width: "auto", borderRadius: 6 }} />
               <b>KostKu</b>
             </span>
             <span className="crumb-page" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>

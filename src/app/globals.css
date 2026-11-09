@@ -553,19 +553,6 @@ div[style*="overflowX: auto"] {
   }
 }
 
-.kostku-brandmark {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  background: var(--primary);
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 15px;
-  flex-shrink: 0;
-}
 .kostku-navitem {
   position: relative;
   display: flex;
@@ -969,9 +956,6 @@ div[style*="overflowX: auto"] {
   .kostku-search {
     display: none;
   }
-  .kostku-breadcrumb {
-    display: none;
-  }
   .kostku-bottomnav {
     display: block;
   }
@@ -987,11 +971,6 @@ div[style*="overflowX: auto"] {
     border-bottom: none;
     padding: 18px 14px 76px;
     min-height: calc(100vh - 56px);
-  }
-  .kostku-brandmark {
-    width: 30px;
-    height: 30px;
-    font-size: 14px;
   }
   td {
     padding: 12px 10px;
