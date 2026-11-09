@@ -58,7 +58,7 @@ export function LaporanBulananPage() {
         title="Laporan Bulanan"
         sub={periode ? `Periode ${label}` : undefined}
         actions={
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {data && (
               <Button variant="secondary" onClick={exportCsv}>
                 Export CSV

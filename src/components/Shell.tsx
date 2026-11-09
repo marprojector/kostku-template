@@ -32,6 +32,24 @@ export function Shell() {
   }, []);
 
   useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setSidebarOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Kunci scroll body saat drawer terbuka di ponsel
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const prev = document.body.style.overflow;
+    if (window.matchMedia("(max-width: 900px)").matches) document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [sidebarOpen]);
+
+  useEffect(() => {
     function update() {
       const d = new Date();
       setTanggal(HARI_ID[d.getDay()] + ", " + d.getDate() + " " + BULAN_ID[d.getMonth()] + " " + d.getFullYear());
@@ -142,7 +160,7 @@ export function Shell() {
                 return (
                   <button
                     key={item.id}
-                    onClick={() => { setSelectedPenyewaId(null); setPage(item.id); }}
+                    onClick={() => { setSelectedPenyewaId(null); setPage(item.id); setSidebarOpen(false); }}
                     aria-current={active ? "page" : undefined}
                     className="kostku-navitem"
                   >

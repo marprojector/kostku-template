@@ -184,7 +184,7 @@ function CashFlow({ series }: { series: DashboardStats["arusKas"] }) {
   return (
     <Card>
       <SectionTitle sub="6 bulan terakhir">Arus Kas</SectionTitle>
-      <div style={{ display: "flex", gap: 8 }}>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "0 0 22px", fontSize: 11, color: "var(--text-muted)", textAlign: "right", minWidth: 56 }} className="tnum">
           {Array.from({ length: ticks + 1 }, (_, i) => (
             <span key={i}>{formatRupiahShort(Math.round((max * (ticks - i)) / ticks))}</span>

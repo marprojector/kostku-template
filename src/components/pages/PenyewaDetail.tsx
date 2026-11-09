@@ -131,6 +131,7 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
     rows.length === 0 ? (
       <EmptyState>Belum ada transaksi</EmptyState>
     ) : (
+      <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
         <thead>
           <tr>
@@ -160,6 +161,7 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
           })}
         </tbody>
       </table>
+      </div>
     );
 
   return (
@@ -168,7 +170,7 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
         title={penyewaNama}
         sub={`ID Penyewa #${penyewa.id}`}
         actions={
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <Button variant="secondary" onClick={onBack}>Kembali</Button>
             <Button variant="primary" onClick={() => {
               const msg = `Halo ${penyewaNama}, ada yang bisa kami bantu?`;
@@ -241,6 +243,7 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
         {kontrak.length === 0 ? (
           <EmptyState>Tidak ada riwayat kontrak</EmptyState>
         ) : (
+          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr>
@@ -267,6 +270,7 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
               })}
             </tbody>
           </table>
+          </div>
         )}
 
         {kontrakAktif && (
@@ -350,6 +354,7 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
         {tagihan.length === 0 ? (
           <EmptyState>Belum ada tagihan</EmptyState>
         ) : (
+          <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr>
@@ -375,6 +380,7 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
               })}
             </tbody>
           </table>
+          </div>
         )}
       </Card>
 

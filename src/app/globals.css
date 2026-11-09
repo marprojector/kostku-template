@@ -208,6 +208,8 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 h1, h2, h3 {
@@ -221,7 +223,7 @@ h1, h2, h3 {
 
 /* ---------- Focus ---------- */
 :focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--ring, var(--primary));
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -246,14 +248,16 @@ input,
 select,
 textarea {
   font-family: inherit;
-  font-size: 14px;
+  /* ≥16px: iOS Safari tidak auto-zoom saat fokus */
+  font-size: 16px;
   background: var(--card);
   color: var(--foreground);
   border: 1px solid var(--input);
   border-radius: calc(var(--radius-shadcn) - 2px);
-  padding: 10px 13px;
+  padding: 9px 13px;
   transition: border-color 150ms ease, box-shadow 150ms ease;
   width: 100%;
+  min-width: 0;
 }
 input:hover,
 select:hover,
@@ -320,6 +324,17 @@ tbody tr {
 }
 tbody tr:hover {
   background: color-mix(in srgb, var(--muted) 55%, transparent);
+}
+
+/* Cegah grid blowout: konten lebar (tabel/chart) tidak memaksa kolom melebihi wadah */
+.grid-2 > * {
+  min-width: 0;
+}
+
+/* Wrapper tabel punya scroll halus di layar sentuh */
+div[style*="overflow-x: auto"],
+div[style*="overflowX: auto"] {
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ---------- Layout: frame + inset sheet ---------- */
@@ -513,13 +528,95 @@ tbody tr:hover {
     border-left: none;
     border-right: none;
     border-bottom: none;
-    padding: 20px 16px 40px;
+    padding: 18px 14px 48px;
     min-height: calc(100vh - 58px);
   }
   .kostku-brandmark {
     width: 30px;
     height: 30px;
     font-size: 14px;
+  }
+  td {
+    padding: 12px 10px;
+    font-size: 13.5px;
+  }
+  th {
+    padding: 10px;
+  }
+}
+
+/* Ponsel: sempitkan aman + susun elemen */
+@media (max-width: 560px) {
+  .kostku-sheet {
+    padding: 14px 12px 56px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  .kostku-main > header {
+    padding-left: max(12px, env(safe-area-inset-left)) !important;
+    padding-right: max(12px, env(safe-area-inset-right)) !important;
+    gap: 8px !important;
+  }
+  .kostku-main > header > div:last-child {
+    display: none; /* tanggal di header disembunyikan di ponsel */
+  }
+  /* KPI strip: 1 kolom, pemisah jadi border-bawah */
+  .kostku-sheet > div > div > div[style*="minmax(180px"],
+  .kostku-sheet > div > div > div[style*="minmax(190px"] {
+    grid-template-columns: 1fr !important;
+  }
+  .kostku-sheet > div > div > div[style*="minmax(180px"] > div,
+  .kostku-sheet > div > div > div[style*="minmax(190px"] > div {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px !important;
+  }
+  .kostku-sheet > div > div > div[style*="minmax(180px"] > div:last-child,
+  .kostku-sheet > div > div > div[style*="minmax(190px"] > div:last-child {
+    border-bottom: none;
+  }
+  /* Baris kategori: susun vertikal */
+  .kostku-sheet > div > div > div > div[style*="flexWrap"] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  /* Toolbar filter: search full width */
+  .kostku-sheet input[aria-label="Cari kamar"],
+  .kostku-sheet input[aria-label="Cari transaksi"],
+  .kostku-sheet input[aria-label="Cari tagihan"],
+  .kostku-sheet input[aria-label="Cari penyewa"] {
+    max-width: 100% !important;
+    width: 100%;
+  }
+  /* Tombol header halaman wrap rapi */
+  .kostku-sheet > div > div:first-child {
+    flex-wrap: wrap;
+  }
+  /* Chart tinggi cukup di ponsel */
+  .recharts-responsive-container {
+    min-height: 180px;
+  }
+  /* Segmented scrollable kalau sempit */
+  .segmented {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  /* Font judul lebih kecil */
+  .kostku-sheet h1,
+  .kostku-sheet h2 {
+    font-size: 20px !important;
+  }
+}
+
+/* Ponsel sangat kecil */
+@media (max-width: 380px) {
+  .kostku-sheet {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .kostku-sheet td {
+    padding: 10px 8px;
+    font-size: 13px;
   }
 }
 

@@ -160,7 +160,7 @@ export function PengaturanPage() {
             </label>
             <input id="set-pemilik" value={namaPemilik} onChange={(e) => setNamaPemilik(e.target.value)} />
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <Button
               variant="primary"
               disabled={saving}
@@ -287,7 +287,7 @@ export function PengaturanPage() {
           {katErr && (
             <div role="alert" style={{ fontSize: 12.5, color: "var(--danger)", marginTop: 6 }}>{katErr}</div>
           )}
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <input
               value={newKat}
               onChange={(e) => setNewKat(e.target.value)}

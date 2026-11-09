@@ -35,7 +35,7 @@ export function LaporanTahunanPage() {
         title="Laporan Tahunan"
         sub={data ? `${bulanAktif} bulan berisi transaksi` : undefined}
         actions={
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {data && (
               <Button variant="secondary" onClick={exportCsv}>
                 Export CSV
@@ -78,6 +78,7 @@ export function LaporanTahunanPage() {
 
           <Card style={{ marginBottom: 16 }}>
             <SectionTitle sub="Pendapatan dibanding pengeluaran setiap bulan">Arus Kas {tahun}</SectionTitle>
+            <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
             <div
               style={{
                 display: "flex",
@@ -85,6 +86,7 @@ export function LaporanTahunanPage() {
                 gap: 6,
                 height: 180,
                 paddingTop: 8,
+                minWidth: 300,
               }}
               role="img"
               aria-label={`Grafik arus kas ${tahun}`}
@@ -114,6 +116,7 @@ export function LaporanTahunanPage() {
                   </div>
                 );
               })}
+            </div>
             </div>
             <div style={{ display: "flex", gap: 16, marginTop: 12, fontSize: 12, color: "var(--text-muted)" }}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>

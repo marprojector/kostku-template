@@ -106,7 +106,7 @@ export function Tagihan() {
         title="Tagihan & WhatsApp"
         sub={`${counts.semua} tagihan · ${counts.lunas} lunas · ${counts.belum} belum lunas`}
         actions={
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <Button variant="secondary" onClick={exportCsv} disabled={filtered.length === 0}>
               Export CSV
             </Button>
