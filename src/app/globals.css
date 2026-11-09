@@ -957,8 +957,8 @@ div[style*="overflowX: auto"] {
   .crumb-page {
     display: none !important;
   }
-  .kostku-searchbtn {
-    display: none;
+  .kostku-header-actions {
+    margin-left: auto;
   }
   .kostku-sidebar[data-open="true"] {
     transform: translateX(0);
