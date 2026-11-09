@@ -339,6 +339,7 @@ div[style*="overflowX: auto"] {
   flex-direction: column;
   min-height: 100vh;
   min-width: 0;
+  flex: 1;
 }
 
 /* ---------- Topbar ---------- */
@@ -639,7 +640,6 @@ div[style*="overflowX: auto"] {
 .kostku-sheet {
   flex: 1;
   width: calc(100% - 24px);
-  max-width: 1360px;
   margin: 8px auto 16px;
   background: var(--sheet);
   border: 1px solid var(--shadcn-border);
@@ -652,7 +652,7 @@ div[style*="overflowX: auto"] {
 /* ---------- Room map ---------- */
 .room-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
   gap: 8px;
 }
 .room-cell {
@@ -742,6 +742,77 @@ div[style*="overflowX: auto"] {
 }
 .cashbar:hover {
   opacity: 0.82;
+}
+.cashflow-chart {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+.cashflow-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: var(--text-muted);
+  text-align: right;
+  min-width: 52px;
+  padding-bottom: 27px; /* baseline + label row */
+  flex-shrink: 0;
+}
+.cashflow-gridlines {
+  position: absolute;
+  inset: 0 0 0 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+}
+.cashflow-gridlines i {
+  display: block;
+  height: 1px;
+  background: var(--border);
+}
+
+/* KPI strip Menu Utama */
+.dashboard-kpi-strip {
+  border-radius: 12px;
+}
+@media (max-width: 900px) {
+  .dashboard-kpi-strip > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .dashboard-kpi-strip > div > div {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border);
+  }
+  .dashboard-kpi-strip > div > div:nth-child(2n) {
+    border-left: 1px solid var(--border);
+  }
+  .dashboard-kpi-strip > div > div:nth-child(n+3) {
+    border-bottom: none;
+  }
+}
+@media (max-width: 480px) {
+  .dashboard-kpi-strip > div {
+    grid-template-columns: 1fr !important;
+  }
+  .dashboard-kpi-strip > div > div {
+    border-left: none !important;
+  }
+  .dashboard-kpi-strip > div > div:nth-child(n+3) {
+    border-bottom: 1px solid var(--border);
+  }
+  .dashboard-kpi-strip > div > div:last-child {
+    border-bottom: none;
+  }
+}
+@media (max-width: 560px) {
+  .cashflow-chart {
+    gap: 6px;
+  }
+  .cashflow-axis {
+    min-width: 44px;
+  }
 }
 
 /* ---------- Command palette ---------- */

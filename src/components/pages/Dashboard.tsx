@@ -38,7 +38,7 @@ function RoomMap({
           { label: `${nunggak} nunggak`, count: nunggak, bg: "var(--danger-bg)", color: "var(--danger)" },
           { label: `${belumTempo} belum tempo`, count: belumTempo, bg: "var(--warning-bg)", color: "var(--warning)" },
           { label: `${aman} lunas`, count: aman, bg: "var(--success-bg)", color: "var(--success)" },
-          { label: `${kosong} kosong`, count: kosong, bg: "var(--surface-2)", color: "var(--text-muted)" },
+          { label: `${kosong} kosong`, count: kosong, bg: "var(--surface-2)", color: "var(--muted-foreground)" },
         ].map((chip) => (
           <span
             key={chip.label}
@@ -76,8 +76,8 @@ function RoomMap({
                   : `${r.nomor} tersedia, ${formatRupiah(r.harga)}/bulan`
               }
             >
-              <span style={{ fontSize: 12.5, fontWeight: 700 }}>{r.nomor.replace("Kamar ", "")}</span>
-              <span style={{ fontSize: 10.5, color: "var(--text-muted)", lineHeight: 1.35 }}>
+              <span style={{ fontSize: 13, fontWeight: 600 }}>{r.nomor.replace("Kamar ", "")}</span>
+              <span style={{ fontSize: 11, color: "var(--muted-foreground)", lineHeight: 1.35 }}>
                 {r.status === "terisi" ? (r.penyewa?.split(" ")[0] ?? "terisi") : formatRupiahShort(r.harga)}
               </span>
             </button>
@@ -98,7 +98,7 @@ function RoomMap({
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
             <div>
-              <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 15, letterSpacing: "-0.02em" }}>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 600, fontSize: 15, letterSpacing: "-0.01em" }}>
                 {sel.nomor}
                 <span
                   style={{
@@ -117,7 +117,7 @@ function RoomMap({
                             : "var(--warning-bg)",
                     color:
                       sel.status !== "terisi"
-                        ? "var(--text-muted)"
+                        ? "var(--muted-foreground)"
                         : sel.tagihanStatus === "lunas"
                           ? "var(--success)"
                           : sel.tagihanStatus === "telat"
@@ -128,14 +128,14 @@ function RoomMap({
                   {sel.status !== "terisi" ? "Tersedia" : sel.tagihanStatus === "lunas" ? "Lunas" : sel.tagihanStatus === "telat" ? "Nunggak" : "Belum Bayar"}
                 </span>
               </div>
-              <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>
+              <div style={{ fontSize: 13, color: "var(--muted-foreground)", marginTop: 4 }}>
                 {sel.status === "terisi" ? (
                   <>
-                    {sel.penyewa ?? "—"} · <span className="tnum" style={{ fontWeight: 600, color: "var(--text)" }}>{formatRupiah(sel.harga)}</span>/bulan
+                    {sel.penyewa ?? "—"} · <span className="tnum" style={{ fontWeight: 600, color: "var(--foreground)" }}>{formatRupiah(sel.harga)}</span>/bulan
                   </>
                 ) : (
                   <>
-                    Kosong · potensi <span className="tnum" style={{ fontWeight: 600, color: "var(--text)" }}>{formatRupiah(sel.harga)}</span>/bulan
+                    Kosong · potensi <span className="tnum" style={{ fontWeight: 600, color: "var(--foreground)" }}>{formatRupiah(sel.harga)}</span>/bulan
                   </>
                 )}
               </div>
@@ -180,48 +180,38 @@ function RoomMap({
 /* Arus kas 6 bulan: kolom ganda pendapatan/pengeluaran pada satu skala */
 function CashFlow({ series }: { series: DashboardStats["arusKas"] }) {
   const max = Math.max(1, ...series.map((s) => Math.max(s.pendapatan, s.pengeluaran)));
-  const ticks = 4;
   return (
-    <Card>
+    <Card style={{ display: "flex", flexDirection: "column" }}>
       <SectionTitle sub="6 bulan terakhir">Arus Kas</SectionTitle>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "0 0 22px", fontSize: 11, color: "var(--text-muted)", textAlign: "right", minWidth: 56 }} className="tnum">
-          {Array.from({ length: ticks + 1 }, (_, i) => (
-            <span key={i}>{formatRupiahShort(Math.round((max * (ticks - i)) / ticks))}</span>
-          ))}
+      <div className="cashflow-chart">
+        <div className="cashflow-axis tnum" aria-hidden="true">
+          <span>{formatRupiahShort(max)}</span>
+          <span>{formatRupiahShort(Math.round(max / 2))}</span>
+          <span>Rp0</span>
         </div>
-        <div style={{ flex: 1, position: "relative" }}>
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${series.length}, 1fr)`, height: 148, alignItems: "end", borderBottom: "1px solid var(--border-strong)", columnGap: 14 }}>
-            {series.map((s) => (
-              <div key={s.bulan} style={{ display: "flex", gap: 3, alignItems: "flex-end", height: "100%", justifyContent: "center" }}>
-                <div
-                  className="cashbar"
-                  title={`Pendapatan ${formatRupiah(s.pendapatan)}`}
-                  style={{ width: 14, height: `${(s.pendapatan / max) * 100}%`, minHeight: s.pendapatan > 0 ? 3 : 1, background: "linear-gradient(180deg, color-mix(in srgb, var(--primary) 75%, #fff), var(--primary))", borderRadius: "3px 3px 0 0" }}
-                />
-                <div
-                  className="cashbar"
-                  title={`Pengeluaran ${formatRupiah(s.pengeluaran)}`}
-                  style={{ width: 14, height: `${(s.pengeluaran / max) * 100}%`, minHeight: s.pengeluaran > 0 ? 3 : 1, background: "color-mix(in srgb, var(--danger) 55%, transparent)", borderRadius: "3px 3px 0 0" }}
-                />
-              </div>
-            ))}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ position: "relative" }}>
+            <div className="cashflow-gridlines" aria-hidden="true"><i /><i /></div>
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(${series.length}, minmax(0, 1fr))`, height: 164, alignItems: "end", columnGap: 8, position: "relative", zIndex: 1, borderBottom: "1px solid var(--border-strong)" }}>
+              {series.map((s) => (
+                <div key={s.bulan} style={{ display: "flex", gap: 4, alignItems: "flex-end", height: "100%", justifyContent: "center" }}>
+                  <div className="cashbar" title={`Pendapatan ${formatRupiah(s.pendapatan)}`} style={{ width: 18, height: `${(s.pendapatan / max) * 100}%`, minHeight: s.pendapatan > 0 ? 3 : 1, background: "var(--primary)", borderRadius: "4px 4px 0 0" }} />
+                  <div className="cashbar" title={`Pengeluaran ${formatRupiah(s.pengeluaran)}`} style={{ width: 18, height: `${(s.pengeluaran / max) * 100}%`, minHeight: s.pengeluaran > 0 ? 3 : 1, background: "var(--danger)", opacity: 0.65, borderRadius: "4px 4px 0 0" }} />
+                </div>
+              ))}
+            </div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: `repeat(${series.length}, 1fr)`, columnGap: 14, marginTop: 6 }}>
-            {series.map((s) => (
-              <div key={s.bulan} style={{ textAlign: "center", fontSize: 11, color: "var(--text-muted)" }}>
-                {s.label}
-              </div>
-            ))}
+          <div style={{ display: "grid", gridTemplateColumns: `repeat(${series.length}, minmax(0, 1fr))`, columnGap: 8, marginTop: 8 }}>
+            {series.map((s) => <div key={s.bulan} style={{ textAlign: "center", fontSize: 11, color: "var(--muted-foreground)" }}>{s.label}</div>)}
           </div>
         </div>
       </div>
-      <div style={{ display: "flex", gap: 16, marginTop: 10, fontSize: 12, color: "var(--text-muted)" }}>
+      <div style={{ display: "flex", gap: 16, marginTop: 12, fontSize: 12, color: "var(--muted-foreground)" }}>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
           <span style={{ width: 10, height: 10, borderRadius: 3, background: "var(--primary)", display: "inline-block" }} /> Pendapatan
         </span>
         <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 3, background: "color-mix(in srgb, var(--danger) 55%, transparent)", display: "inline-block" }} /> Pengeluaran
+          <span style={{ width: 10, height: 10, borderRadius: 3, background: "color-mix(in srgb, var(--danger) 65%, transparent)", display: "inline-block" }} /> Pengeluaran
         </span>
       </div>
     </Card>
@@ -280,31 +270,31 @@ export function Dashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: number) 
       />
 
       {/* Strip KPI: satu container, dipisah 1px hairline */}
-      <Card style={{ padding: 0, overflow: "hidden", marginBottom: 16 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
-          <div style={{ padding: "18px 22px", borderRight: "1px solid var(--border)" }}>
-            <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-faint)", marginBottom: 6 }}>Okupansi</div>
-            <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em" }}>
+      <Card className="dashboard-kpi-strip" style={{ padding: 0, overflow: "hidden", marginBottom: 16 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+          <div style={{ padding: "16px 18px", borderRight: "1px solid var(--border)" }}>
+            <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--muted-foreground)", marginBottom: 4 }}>Okupansi</div>
+            <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 600, letterSpacing: "-0.02em" }}>
               <CountUp value={data.okupansi.persen} format={(n) => `${Math.round(n)}%`} />
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3 }}>{data.okupansi.terisi} terisi · {data.okupansi.tersedia} tersedia</div>
+            <div style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 3 }}>{data.okupansi.terisi} terisi · {data.okupansi.tersedia} tersedia</div>
           </div>
-          <div style={{ padding: "18px 22px", borderRight: "1px solid var(--border)" }}>
-            <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-faint)", marginBottom: 6 }}>Belum Tertagih</div>
-            <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em", color: data.tagihan.belumLunas > 0 ? "var(--danger)" : undefined }}>
+          <div style={{ padding: "16px 18px", borderRight: "1px solid var(--border)" }}>
+            <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--muted-foreground)", marginBottom: 4 }}>Belum Tertagih</div>
+            <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 600, letterSpacing: "-0.02em", color: data.tagihan.belumLunas > 0 ? "var(--danger)" : undefined }}>
               <CountUp value={data.tagihan.totalBelumLunas} format={(n) => formatRupiah(Math.round(n))} />
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3 }}>{data.tagihan.belumLunas} tagihan aktif</div>
+            <div style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 3 }}>{data.tagihan.belumLunas} tagihan aktif</div>
           </div>
-          <div style={{ padding: "18px 22px", borderRight: "1px solid var(--border)" }}>
-            <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-faint)", marginBottom: 6 }}>Laba {BULAN_ID[Number(bulanKpi) - 1]}</div>
-            <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em", color: k.laba >= 0 ? "var(--success)" : "var(--danger)" }}>{formatRupiah(k.laba)}</div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3 }}>Margin {k.pendapatan > 0 ? Math.round((k.laba / k.pendapatan) * 100) : 0}%</div>
+          <div style={{ padding: "16px 18px", borderRight: "1px solid var(--border)" }}>
+            <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--muted-foreground)", marginBottom: 4 }}>Laba {BULAN_ID[Number(bulanKpi) - 1]}</div>
+            <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 600, letterSpacing: "-0.02em", color: k.laba >= 0 ? "var(--success)" : "var(--danger)" }}>{formatRupiah(k.laba)}</div>
+            <div style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 3 }}>Margin {k.pendapatan > 0 ? Math.round((k.laba / k.pendapatan) * 100) : 0}%</div>
           </div>
-          <div style={{ padding: "18px 22px" }}>
-            <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-faint)", marginBottom: 6 }}>Pendapatan {BULAN_ID[Number(bulanKpi) - 1]}</div>
-            <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em" }}>{formatRupiah(k.pendapatan)}</div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3 }}>
+          <div style={{ padding: "16px 18px" }}>
+            <div style={{ fontSize: 12.5, fontWeight: 500, color: "var(--muted-foreground)", marginBottom: 4 }}>Pendapatan {BULAN_ID[Number(bulanKpi) - 1]}</div>
+            <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 600, letterSpacing: "-0.02em" }}>{formatRupiah(k.pendapatan)}</div>
+            <div style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 3 }}>
               {k.bulanLalu > 0 && (
                 <span style={{ fontWeight: 600, color: k.pendapatan >= k.bulanLalu ? "var(--success)" : "var(--danger)" }}>
                   {k.pendapatan >= k.bulanLalu ? "+" : ""}{Math.round(pctPdp)}%
@@ -348,7 +338,7 @@ export function Dashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: number) 
                       <div style={{ fontSize: 13.5, fontWeight: 600 }}>
                         {t.kamar_nomor} — {t.nama_penyewa}
                       </div>
-                      <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                      <div style={{ fontSize: 12, color: "var(--muted-foreground)" }}>
                         {tanggalPendek(t.jatuhTempo)}
                       </div>
                     </div>

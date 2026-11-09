@@ -219,15 +219,6 @@ export function Shell() {
               {identitas.namaKos}
             </div>
           </div>
-          <button
-            className="kostku-trigger"
-            data-desktop="true"
-            onClick={() => setCollapsed((v) => !v)}
-            aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
-            title={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
-          >
-            <PanelLeft size={16} />
-          </button>
         </div>
 
         <nav style={{ flex: 1, overflowY: "auto", padding: "6px 10px 16px" }} aria-label="Menu">
