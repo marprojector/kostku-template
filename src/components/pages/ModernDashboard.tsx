@@ -122,7 +122,7 @@ function OkupansiCard({ data }: { data: DashboardStats }) {
   const o = data.okupansi;
   const pct = Math.round(o.persen);
   return (
-    <Card className="lg:col-span-7">
+    <Card className="col-span-12 min-w-0 overflow-hidden lg:col-span-7">
       <CardHeader className="flex-row items-start justify-between space-y-0 pb-2">
         <div className="space-y-1.5">
           <CardTitle className="text-base">Okupansi Kamar</CardTitle>
@@ -160,7 +160,7 @@ function OkupansiCard({ data }: { data: DashboardStats }) {
 /* ---------- Arus kas bar chart (pattern: totals-assets / advertisement-cost) ---------- */
 function ArusKasCard({ data }: { data: DashboardStats }) {
   return (
-    <Card className="lg:col-span-5">
+    <Card className="col-span-12 min-w-0 overflow-hidden lg:col-span-5">
       <CardHeader className="pb-2">
         <CardTitle className="text-base">Arus Kas 6 Bulan</CardTitle>
         <CardDescription>Pendapatan vs pengeluaran</CardDescription>
