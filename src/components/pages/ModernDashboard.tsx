@@ -25,13 +25,15 @@ import {
 import { motion } from "framer-motion";
 
 import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardDescription, Progress, Separator } from "@/components/shadcn";
+import { CountUp } from "@/components/fx";
 import { fetchDashboard, formatRupiah, type DashboardStats } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
 import { BULAN_ID, HARI_ID, formatRupiahShort } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import type { Identitas } from "@/lib/identitas";
 
 /* ---------- Greeting header (pattern: overview-tab shadcndashboard) ---------- */
-function GreetingBar({ onReload, reloading }: { onReload: () => void; reloading: boolean }) {
+function GreetingBar({ onReload, reloading, identitas }: { onReload: () => void; reloading: boolean; identitas: Identitas }) {
   const [now, setNow] = React.useState(() => new Date());
   React.useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60_000);
@@ -45,12 +47,12 @@ function GreetingBar({ onReload, reloading }: { onReload: () => void; reloading:
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div className="flex flex-col items-start gap-1">
         <h2 className="flex items-center gap-2 text-xl font-semibold tracking-tight text-[var(--foreground)]">
-          {greeting}, Pak Ammar
+          {greeting}, {identitas.namaPemilik}
           <span className="flex items-center">
             {isDay ? <Sun size={22} className="text-[var(--chart-4)]" /> : <Moon size={22} />}
           </span>
         </h2>
-        <p className="text-sm text-[var(--muted-foreground)]">Pantau okupansi &amp; arus kas Kos Perajin hari ini</p>
+        <p className="text-sm text-[var(--muted-foreground)]">Pantau okupansi &amp; arus kas {identitas.namaKos} hari ini</p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="outline" size="icon" onClick={onReload} aria-label="Muat ulang" disabled={reloading}>
@@ -68,7 +70,7 @@ function GreetingBar({ onReload, reloading }: { onReload: () => void; reloading:
 /* ---------- KPI stat card (pattern: total-sales / total-profit) ---------- */
 interface StatDef {
   label: string;
-  value: string;
+  value: React.ReactNode;
   sub?: string;
   delta?: number;
   icon: React.ReactNode;
@@ -237,7 +239,7 @@ function JatuhTempoCard({ data, onOpenPenyewa }: { data: DashboardStats; onOpenP
 }
 
 /* ---------- Halaman Modern Dashboard ---------- */
-export function ModernDashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: number) => void } = {}) {
+export function ModernDashboard({ onSelectPenyewa, identitas }: { onSelectPenyewa?: (id: number) => void; identitas: Identitas } = { onSelectPenyewa: undefined, identitas: { namaKos: "Kos Perajin", alamat: "", namaPemilik: "Ammar" } }) {
   const { data, loading, error, reload } = useApi<DashboardStats>(() => fetchDashboard());
 
   if (loading) {
@@ -269,21 +271,21 @@ export function ModernDashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: nu
   const stats: StatDef[] = [
     {
       label: "Total Kamar",
-      value: String(data.okupansi.total),
+      value: <CountUp value={data.okupansi.total} />,
       sub: `${data.okupansi.terisi} terisi · ${data.okupansi.tersedia} kosong`,
       icon: <BedDouble size={20} />,
       iconClass: "",
     },
     {
       label: "Okupansi",
-      value: `${Math.round(data.okupansi.persen)}%`,
+      value: <CountUp value={Math.round(data.okupansi.persen)} format={(n) => `${Math.round(n)}%`} />,
       sub: `${data.okupansi.terisi}/${data.okupansi.total} kamar`,
       icon: <TrendingUp size={20} />,
       iconClass: "",
     },
     {
       label: `Pendapatan ${labelBulan}`,
-      value: formatRupiah(k.pendapatan),
+      value: <CountUp value={k.pendapatan} format={(n) => formatRupiah(Math.round(n))} />,
       sub: k.bulanLalu > 0 ? `Bulan lalu ${formatRupiahShort(k.bulanLalu)}` : undefined,
       delta: k.bulanLalu > 0 ? deltaPdp : undefined,
       icon: <Wallet size={20} />,
@@ -291,7 +293,7 @@ export function ModernDashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: nu
     },
     {
       label: "Tagihan Belum Lunas",
-      value: String(data.tagihan.belumLunas),
+      value: <CountUp value={data.tagihan.belumLunas} />,
       sub: `Total ${formatRupiah(data.tagihan.totalBelumLunas)}`,
       icon: <TrendingDown size={20} />,
       iconClass: "",
@@ -300,7 +302,7 @@ export function ModernDashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: nu
 
   return (
     <div className="flex flex-col gap-6">
-      <GreetingBar onReload={reload} reloading={loading} />
+      <GreetingBar onReload={reload} reloading={loading} identitas={identitas} />
 
       {/* KPI row */}
       <div className="grid grid-cols-12 gap-4">
@@ -312,13 +314,15 @@ export function ModernDashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: nu
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-12 gap-4">
+      <div className="grid grid-cols-12 gap-4" data-reveal>
         <OkupansiCard data={data} />
         <ArusKasCard data={data} />
       </div>
 
       {/* Jatuh tempo */}
-      <JatuhTempoCard data={data} onOpenPenyewa={onSelectPenyewa} />
+      <div data-reveal>
+        <JatuhTempoCard data={data} onOpenPenyewa={onSelectPenyewa} />
+      </div>
     </div>
   );
 }

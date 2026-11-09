@@ -312,6 +312,76 @@ export async function bayarTagihan(id: number) {
   return json;
 }
 
+export async function bayarSemuaTagihan(periode?: string) {
+  const res = await fetch(`/api/tagihan/bayar-semua${periode ? `?periode=${encodeURIComponent(periode)}` : ""}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal membayar semua tagihan");
+  return json as { ok: boolean; dibayar: number; total: number; tanggalBayar?: string };
+}
+
+export async function createTransaksi(payload: {
+  tipe: "pemasukan" | "pengeluaran";
+  kategori: string;
+  nominal: number;
+  tanggal: string;
+  keterangan?: string;
+}): Promise<{ id: number; ok: boolean }> {
+  const res = await fetch("/api/transaksi", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal mencatat transaksi");
+  return json;
+}
+
+export async function updateTransaksi(
+  id: number,
+  payload: { tipe?: "pemasukan" | "pengeluaran"; kategori?: string; nominal?: number; tanggal?: string; keterangan?: string }
+): Promise<{ ok: boolean }> {
+  const res = await fetch(`/api/transaksi/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal mengubah transaksi");
+  return json;
+}
+
+export async function deleteTransaksi(id: number): Promise<{ ok: boolean }> {
+  const res = await fetch(`/api/transaksi/${id}`, { method: "DELETE" });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal menghapus transaksi");
+  return json;
+}
+
+export async function updatePengaturan(key: string, value: unknown): Promise<{ ok: boolean }> {
+  const res = await fetch(`/api/pengaturan?key=${encodeURIComponent(key)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ value }),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal menyimpan pengaturan");
+  return json;
+}
+
+export async function renameKategori(dari: string, ke: string): Promise<{ ok: boolean; kategori_pengeluaran?: string[] }> {
+  const res = await fetch("/api/pengaturan?key=rename_kategori", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ value: { dari, ke } }),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error ?? "Gagal mengganti kategori");
+  return json;
+}
+
 export async function createKamar(payload: { nomor: string; hargaSewa: number }): Promise<{ ok: boolean; id: number }> {
   const res = await fetch("/api/kamar", {
     method: "POST",

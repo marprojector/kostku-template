@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/ui";
 import { fetchKamar, formatRupiah, waLink, createKamar, updateKamar, deleteKamar, type RoomRow } from "@/lib/api";
 import { tanggalPendek } from "@/lib/format";
+import { useIdentitas } from "@/lib/identitas";
 import { useApi } from "@/lib/useApi";
 
 const EMPTY_ROWS: RoomRow[] = [];
@@ -16,6 +17,7 @@ interface Props {
 
 export function DatabaseKamar({ onSelectPenyewa }: Props) {
   const { data, loading, error, reload } = useApi<RoomRow[]>(() => fetchKamar());
+  const identitas = useIdentitas();
   const [filter, setFilter] = useState<Filter>("semua");
   const [q, setQ] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -269,7 +271,7 @@ export function DatabaseKamar({ onSelectPenyewa }: Props) {
                             <a
                               href={waLink(
                                 r.penyewa.noWa,
-                                `Halo ${r.penyewa.nama}, kami dari pengelola Kos Perajin ingin mengingatkan sewa ${r.kamar.nomor}.`
+                                `Halo ${r.penyewa.nama}, kami dari pengelola ${identitas.namaKos} ingin mengingatkan sewa ${r.kamar.nomor}.`
                               )}
                               target="_blank"
                               rel="noopener noreferrer"

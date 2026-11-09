@@ -1,19 +1,115 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/ui";
-import { fetchTransaksi, formatRupiah, type Transaksi } from "@/lib/api";
+import { useEffect, useMemo, useState } from "react";
+import { Badge, Button, Card, EmptyState, PageHeader, SectionTitle, Skeleton } from "@/components/ui";
+import { createTransaksi, deleteTransaksi, fetchTransaksi, formatRupiah, updateTransaksi, type Transaksi } from "@/lib/api";
 import { tanggalPendek } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 import { useBulanIni } from "@/lib/useNow";
 
 const EMPTY_TRANSAKSI: Transaksi[] = [];
+const EMPTY_KATEGORI: string[] = [];
+
+interface FormTransaksi {
+  tipe: "pemasukan" | "pengeluaran";
+  kategori: string;
+  nominal: string;
+  tanggal: string;
+  keterangan: string;
+}
+
+function formKosong(): FormTransaksi {
+  return { tipe: "pengeluaran", kategori: "", nominal: "", tanggal: new Date().toLocaleDateString("sv-SE"), keterangan: "" };
+}
 
 export function TransaksiPage() {
   const bulanIni = useBulanIni();
-  const { data, loading, error } = useApi<Transaksi[]>(() => fetchTransaksi());
+  const { data, loading, error, reload } = useApi<Transaksi[]>(() => fetchTransaksi());
   const [tipeFilter, setTipeFilter] = useState<"semua" | "pemasukan" | "pengeluaran">("semua");
   const [q, setQ] = useState("");
+  const [kategori, setKategori] = useState<string[]>(EMPTY_KATEGORI);
+  const [form, setForm] = useState<FormTransaksi>(formKosong);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [formErr, setFormErr] = useState<string | null>(null);
+  const [savingForm, setSavingForm] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/pengaturan", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: { kategori_pengeluaran?: string[] } | null) => {
+        if (j?.kategori_pengeluaran) setKategori(j.kategori_pengeluaran);
+      })
+      .catch(() => {});
+  }, []);
+
+  const pilihKategori = form.kategori || kategori[0] || "";
+
+  function resetForm() {
+    setForm(formKosong());
+    setEditingId(null);
+    setFormErr(null);
+  }
+
+  async function simpanForm() {
+    const nominal = Number(form.nominal.replace(/[^\d]/g, ""));
+    if (!form.kategori && kategori.length > 0) setForm((f) => ({ ...f, kategori: kategori[0] }));
+    setFormErr(null);
+    if (!pilihKategori) {
+      setFormErr("Pilih atau isi kategori dulu.");
+      return;
+    }
+    if (!Number.isSafeInteger(nominal) || nominal < 0) {
+      setFormErr("Nominal harus angka (mis. 150000).");
+      return;
+    }
+    if (!form.tanggal) {
+      setFormErr("Tanggal wajib diisi.");
+      return;
+    }
+    setSavingForm(true);
+    try {
+      const payload = {
+        tipe: form.tipe,
+        kategori: pilihKategori,
+        nominal,
+        tanggal: form.tanggal,
+        keterangan: form.keterangan,
+      };
+      if (editingId !== null) {
+        await updateTransaksi(editingId, payload);
+      } else {
+        await createTransaksi(payload);
+      }
+      resetForm();
+      await reload();
+    } catch (err) {
+      setFormErr(err instanceof Error ? err.message : "Gagal menyimpan transaksi");
+    } finally {
+      setSavingForm(false);
+    }
+  }
+
+  function mulaiEdit(t: Transaksi) {
+    setEditingId(t.id);
+    setForm({
+      tipe: t.tipe,
+      kategori: t.kategori ?? "",
+      nominal: String(t.nominal),
+      tanggal: t.tanggal,
+      keterangan: t.keterangan ?? "",
+    });
+    setFormErr(null);
+  }
+
+  async function hapusTransaksi(id: number) {
+    if (!window.confirm("Hapus transaksi ini?")) return;
+    try {
+      await deleteTransaksi(id);
+      await reload();
+    } catch (err) {
+      setFormErr(err instanceof Error ? err.message : "Gagal menghapus transaksi");
+    }
+  }
 
   const rows = data ?? EMPTY_TRANSAKSI;
   const counts = useMemo(
@@ -68,6 +164,95 @@ export function TransaksiPage() {
         }
       />
 
+      <Card style={{ marginBottom: 16 }}>
+        <SectionTitle sub={editingId !== null ? `Mengubah transaksi #${editingId}` : "Pemasukan atau pengeluaran"}>
+          {editingId !== null ? "Edit Transaksi" : "Catat Transaksi"}
+        </SectionTitle>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10 }}>
+          <div className="segmented" role="tablist" aria-label="Tipe transaksi">
+            {([
+              ["pemasukan", "Pemasukan"],
+              ["pengeluaran", "Pengeluaran"],
+            ] as const).map(([val, lbl]) => (
+              <button
+                key={val}
+                type="button"
+                data-active={form.tipe === val}
+                onClick={() => setForm((f) => ({ ...f, tipe: val }))}
+                role="tab"
+                aria-selected={form.tipe === val}
+              >
+                {lbl}
+              </button>
+            ))}
+          </div>
+          <div>
+            <label htmlFor="trx-kategori" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
+              Kategori
+            </label>
+            <select
+              id="trx-kategori"
+              value={pilihKategori}
+              onChange={(e) => setForm((f) => ({ ...f, kategori: e.target.value }))}
+              style={{ width: "100%" }}
+            >
+              {kategori.length === 0 && <option value="">— isi manual —</option>}
+              {kategori.map((k) => (
+                <option key={k} value={k}>{k}</option>
+              ))}
+              {form.kategori && !kategori.includes(form.kategori) && (
+                <option value={form.kategori}>{form.kategori}</option>
+              )}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="trx-nominal" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
+              Harga / Nominal (Rp)
+            </label>
+            <input
+              id="trx-nominal"
+              value={form.nominal}
+              onChange={(e) => setForm((f) => ({ ...f, nominal: e.target.value }))}
+              inputMode="numeric"
+              placeholder="mis. 150000"
+            />
+          </div>
+          <div>
+            <label htmlFor="trx-tanggal" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
+              Tanggal
+            </label>
+            <input
+              id="trx-tanggal"
+              type="date"
+              value={form.tanggal}
+              onChange={(e) => setForm((f) => ({ ...f, tanggal: e.target.value }))}
+            />
+          </div>
+          <div>
+            <label htmlFor="trx-ket" style={{ display: "block", fontSize: 12, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4 }}>
+              Keterangan
+            </label>
+            <input
+              id="trx-ket"
+              value={form.keterangan}
+              onChange={(e) => setForm((f) => ({ ...f, keterangan: e.target.value }))}
+              placeholder="Opsional"
+            />
+          </div>
+        </div>
+        {formErr && (
+          <div role="alert" style={{ fontSize: 12.5, color: "var(--danger)", marginTop: 8 }}>{formErr}</div>
+        )}
+        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+          <Button variant="primary" onClick={() => void simpanForm()} disabled={savingForm}>
+            {savingForm ? "Menyimpan…" : editingId !== null ? "Simpan Perubahan" : "Simpan Transaksi"}
+          </Button>
+          {editingId !== null && (
+            <Button variant="secondary" onClick={resetForm}>Batal</Button>
+          )}
+        </div>
+      </Card>
+
       <div style={{ display: "flex", gap: 8, marginBottom: 14, flexWrap: "wrap", alignItems: "center" }}>
         <div className="segmented" role="tablist" aria-label="Filter tipe">
           {([
@@ -121,6 +306,7 @@ export function TransaksiPage() {
                   <th>Kategori</th>
                   <th style={{ textAlign: "right" }}>Nominal</th>
                   <th>Keterangan</th>
+                  <th style={{ textAlign: "right" }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -144,6 +330,16 @@ export function TransaksiPage() {
                       {formatRupiah(t.nominal)}
                     </td>
                     <td>{t.keterangan ?? "—"}</td>
+                    <td style={{ textAlign: "right" }}>
+                      <span style={{ display: "inline-flex", gap: 6 }}>
+                        <Button size="sm" variant="secondary" onClick={() => mulaiEdit(t)}>
+                          Edit
+                        </Button>
+                        <Button size="sm" variant="danger" onClick={() => void hapusTransaksi(t.id)}>
+                          Hapus
+                        </Button>
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>

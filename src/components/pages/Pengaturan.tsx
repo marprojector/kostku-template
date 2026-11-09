@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, SectionTitle, Skeleton } from "@/components/ui";
+import { notifyIdentitasChanged } from "@/lib/identitas";
+import { renameKategori } from "@/lib/api";
 
 interface Settings {
   kategori_pengeluaran?: string[];
   nama_kos?: string;
   alamat?: string;
   nama_pemilik?: string;
+  auto_bayar?: boolean;
   [key: string]: unknown;
 }
 
@@ -18,6 +21,9 @@ export function PengaturanPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [newKat, setNewKat] = useState("");
+  const [editKat, setEditKat] = useState<string | null>(null);
+  const [editKatVal, setEditKatVal] = useState("");
+  const [katErr, setKatErr] = useState<string | null>(null);
   const [namaKos, setNamaKos] = useState("");
   const [alamat, setAlamat] = useState("");
   const [namaPemilik, setNamaPemilik] = useState("");
@@ -56,7 +62,12 @@ export function PengaturanPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ value }),
       });
-      if (!res.ok) throw new Error("Gagal menyimpan");
+      if (!res.ok) {
+        const j = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(j.error ?? "Gagal menyimpan");
+      }
+      setSettings((s) => (s ? { ...s, [key]: value } : s));
+      notifyIdentitasChanged();
       setSaved(true);
       setTimeout(() => setSaved(false), 2200);
     } finally {
@@ -75,6 +86,29 @@ export function PengaturanPage() {
 
   function hapusKategori(kat: string) {
     void simpan("kategori_pengeluaran", kategori.filter((k) => k !== kat));
+  }
+
+  async function simpanRename() {
+    if (!editKat) return;
+    const v = editKatVal.trim();
+    setKatErr(null);
+    if (!v || v === editKat) {
+      setEditKat(null);
+      return;
+    }
+    if (kategori.includes(v)) {
+      setKatErr("Kategori sudah ada");
+      return;
+    }
+    try {
+      const res = await renameKategori(editKat, v);
+      setSettings((s) => (s ? { ...s, kategori_pengeluaran: res.kategori_pengeluaran ?? kategori.map((k) => (k === editKat ? v : k)) } : s));
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2200);
+      setEditKat(null);
+    } catch (err) {
+      setKatErr(err instanceof Error ? err.message : "Gagal mengganti kategori");
+    }
   }
 
   if (loading) {
@@ -153,13 +187,62 @@ export function PengaturanPage() {
                     borderBottom: "1px solid var(--border)",
                   }}
                 >
-                  <span style={{ fontSize: 13.5 }}>{kat}</span>
-                  <Button size="sm" variant="danger" onClick={() => hapusKategori(kat)} disabled={saving}>
-                    Hapus
-                  </Button>
+                  <span style={{ fontSize: 13.5, flex: 1 }}>
+                    {editKat === kat ? (
+                      <input
+                        value={editKatVal}
+                        onChange={(e) => setEditKatVal(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            void simpanRename();
+                          }
+                          if (e.key === "Escape") setEditKat(null);
+                        }}
+                        autoFocus
+                        aria-label="Nama kategori baru"
+                        style={{ width: "100%", maxWidth: 220 }}
+                      />
+                    ) : (
+                      kat
+                    )}
+                  </span>
+                  <span style={{ display: "inline-flex", gap: 6 }}>
+                    {editKat === kat ? (
+                      <>
+                        <Button size="sm" variant="primary" onClick={() => void simpanRename()} disabled={saving}>
+                          Simpan
+                        </Button>
+                        <Button size="sm" variant="secondary" onClick={() => setEditKat(null)}>
+                          Batal
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => {
+                            setEditKat(kat);
+                            setEditKatVal(kat);
+                            setKatErr(null);
+                          }}
+                          disabled={saving}
+                        >
+                          Edit
+                        </Button>
+                        <Button size="sm" variant="danger" onClick={() => hapusKategori(kat)} disabled={saving}>
+                          Hapus
+                        </Button>
+                      </>
+                    )}
+                  </span>
                 </div>
               ))}
             </div>
+          )}
+          {katErr && (
+            <div role="alert" style={{ fontSize: 12.5, color: "var(--danger)", marginTop: 6 }}>{katErr}</div>
           )}
           <div style={{ display: "flex", gap: 8 }}>
             <input
@@ -177,6 +260,45 @@ export function PengaturanPage() {
             <Button variant="primary" onClick={tambahKategori} disabled={saving || !newKat.trim()}>
               Tambah
             </Button>
+          </div>
+        </Card>
+
+        <Card>
+          <SectionTitle sub="Tandai lunas otomatis tagihan bulan berjalan">Bayar Otomatis Bulanan</SectionTitle>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+            <div style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5, maxWidth: 420 }}>
+              Saat aktif, tagihan yang belum lunas akan otomatis ditandai lunas begitu aplikasi dibuka (sekali per periode).
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={!!settings?.auto_bayar}
+              onClick={() => void simpan("auto_bayar", !settings?.auto_bayar)}
+              style={{
+                flexShrink: 0,
+                width: 44,
+                height: 24,
+                borderRadius: 999,
+                border: "none",
+                cursor: "pointer",
+                background: settings?.auto_bayar ? "var(--primary)" : "var(--border-strong)",
+                position: "relative",
+                transition: "background 160ms",
+              }}
+            >
+              <span
+                style={{
+                  position: "absolute",
+                  top: 2,
+                  left: settings?.auto_bayar ? 22 : 2,
+                  width: 20,
+                  height: 20,
+                  borderRadius: "50%",
+                  background: "var(--primary-foreground)",
+                  transition: "left 160ms",
+                }}
+              />
+            </button>
           </div>
         </Card>
       </div>

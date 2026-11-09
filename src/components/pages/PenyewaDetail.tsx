@@ -273,13 +273,66 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
           <div style={{ marginTop: 14, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
             <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}>Perpanjang Masa Sewa</div>
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <input
-                value={tambahHari}
-                onChange={(e) => setTambahHari(e.target.value)}
-                inputMode="numeric"
-                aria-label="Tambah hari sewa"
-                style={{ width: 90 }}
-              />
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  border: "1px solid var(--input)",
+                  borderRadius: "var(--radius-shadcn, 8px)",
+                  overflow: "hidden",
+                  background: "var(--card)",
+                }}
+              >
+                <button
+                  type="button"
+                  aria-label="Kurangi hari"
+                  onClick={() => setTambahHari((v) => String(Math.max(1, (parseInt(v, 10) || 0) - 1)))}
+                  style={{
+                    width: 30,
+                    height: 34,
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: "var(--muted-foreground)",
+                  }}
+                >
+                  −
+                </button>
+                <input
+                  value={tambahHari}
+                  onChange={(e) => setTambahHari(e.target.value.replace(/[^\d]/g, ""))}
+                  inputMode="numeric"
+                  aria-label="Tambah hari sewa"
+                  style={{
+                    width: 56,
+                    border: "none",
+                    textAlign: "center",
+                    fontWeight: 600,
+                    background: "transparent",
+                    boxShadow: "none",
+                    padding: "6px 0",
+                  }}
+                />
+                <button
+                  type="button"
+                  aria-label="Tambah hari"
+                  onClick={() => setTambahHari((v) => String((parseInt(v, 10) || 0) + 1))}
+                  style={{
+                    width: 30,
+                    height: 34,
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: "var(--muted-foreground)",
+                  }}
+                >
+                  +
+                </button>
+              </div>
               <span style={{ fontSize: 12.5, color: "var(--text-muted)" }}>hari</span>
               <Button size="sm" variant="primary" onClick={() => handlePerpanjang(kontrakAktif.id as number)} disabled={savingPerpanjang}>
                 {savingPerpanjang ? "Memproses…" : "Perpanjang"}

@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { Button, Card } from "@/components/ui";
+import { useIdentitas } from "@/lib/identitas";
 
 export function LoginGate({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<"checking" | "guest" | "authed">("checking");
+  const identitas = useIdentitas();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -64,18 +66,20 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
           padding: 20,
         }}
       >
-        <Card style={{ width: "100%", maxWidth: 400, padding: 30, boxShadow: "var(--shadow-pop)" }}>
+        <Card className="kostku-fade-up" style={{ width: "100%", maxWidth: 400, padding: 30, boxShadow: "var(--shadow-pop)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 11, marginBottom: 6 }}>
             <div className="kostku-brandmark" aria-hidden="true">K</div>
             <div>
               <div style={{ fontFamily: "var(--font-display)", fontSize: 21, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.1, color: "var(--foreground)" }}>
                 <span style={{ color: "var(--primary)" }}>Kost</span>Ku
               </div>
-              <div style={{ fontSize: 11.5, color: "var(--muted-foreground)", marginTop: 1 }}>Kos Perajin</div>
+              <div style={{ fontSize: 11.5, color: "var(--muted-foreground)", marginTop: 1, maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {identitas.namaKos}
+              </div>
             </div>
           </div>
           <div style={{ fontSize: 13, color: "var(--muted-foreground)", marginBottom: 22 }}>
-            Masuk untuk mengelola Kos Perajin
+            Masuk untuk mengelola {identitas.namaKos}
           </div>
 
           <form onSubmit={submit}>

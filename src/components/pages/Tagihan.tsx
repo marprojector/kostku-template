@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/ui";
-import { fetchTagihan, formatRupiah, waLink, generateTagihan, bayarTagihan, type TagihanDetail } from "@/lib/api";
+import { fetchTagihan, formatRupiah, waLink, generateTagihan, bayarTagihan, bayarSemuaTagihan, type TagihanDetail } from "@/lib/api";
 import { BULAN_ID, labelJatuhTempo, selisihHari, tanggalPendek } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 import { useBulanIni } from "@/lib/useNow";
@@ -18,6 +18,7 @@ export function Tagihan() {
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState<number | null>(null);
   const [genBusy, setGenBusy] = useState(false);
+  const [bayarSemuaBusy, setBayarSemuaBusy] = useState(false);
   const [genMsg, setGenMsg] = useState<string | null>(null);
 
   const rows = data ?? EMPTY_TAGIHAN;
@@ -49,6 +50,23 @@ export function Tagihan() {
       reload();
     } finally {
       setBusy(null);
+    }
+  }
+
+  async function handleBayarSemua() {
+    const n = rows.filter((r) => r.status === "belum_lunas").length;
+    if (n === 0) return;
+    if (!window.confirm(`Tandai lunas ${n} tagihan sekaligus? Transaksi pemasukan akan dibuat otomatis.`)) return;
+    setBayarSemuaBusy(true);
+    setGenMsg(null);
+    try {
+      const res = await bayarSemuaTagihan();
+      setGenMsg(`Dibayar ${res.dibayar} tagihan (total ${formatRupiah(res.total)}) per ${res.tanggalBayar}`);
+      reload();
+    } catch (err) {
+      setGenMsg(err instanceof Error ? err.message : "Gagal membayar semua tagihan");
+    } finally {
+      setBayarSemuaBusy(false);
     }
   }
 
@@ -91,6 +109,13 @@ export function Tagihan() {
           <div style={{ display: "flex", gap: 8 }}>
             <Button variant="secondary" onClick={exportCsv} disabled={filtered.length === 0}>
               Export CSV
+            </Button>
+            <Button
+              variant="success"
+              onClick={() => void handleBayarSemua()}
+              disabled={bayarSemuaBusy || counts.belum === 0}
+            >
+              {bayarSemuaBusy ? "Memproses…" : `Bayar Semua (${counts.belum})`}
             </Button>
             <Button variant="primary" onClick={handleGenerate} disabled={genBusy || !bulanIni}>
               {genBusy ? "Membuat…" : `Generate ${bulanIni ? BULAN_ID[Number(bulanIni.split("-")[1]) - 1] : ""}`}

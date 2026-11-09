@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge, Button, Card, EmptyState, PageHeader, SectionTitle, Skeleton } from "@/components/ui";
+import { CountUp } from "@/components/fx";
 import { fetchDashboard, formatRupiah, waLink, bayarTagihan, type DashboardStats } from "@/lib/api";
 import { BULAN_ID, formatRupiahShort, labelJatuhTempo, selisihHari, tanggalPendek } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
@@ -283,15 +284,17 @@ export function Dashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: number) 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))" }}>
           <div style={{ padding: "18px 22px", borderRight: "1px solid var(--border)" }}>
             <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-faint)", marginBottom: 6 }}>Okupansi</div>
-            <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em" }}>{data.okupansi.persen}%</div>
+            <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em" }}>
+              <CountUp value={data.okupansi.persen} format={(n) => `${Math.round(n)}%`} />
+            </div>
             <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3 }}>{data.okupansi.terisi} terisi · {data.okupansi.tersedia} tersedia</div>
           </div>
           <div style={{ padding: "18px 22px", borderRight: "1px solid var(--border)" }}>
             <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-faint)", marginBottom: 6 }}>Belum Tertagih</div>
             <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, letterSpacing: "-0.03em", color: data.tagihan.belumLunas > 0 ? "var(--danger)" : undefined }}>
-              {formatRupiah(data.tagihan.belumLunas)}
+              <CountUp value={data.tagihan.totalBelumLunas} format={(n) => formatRupiah(Math.round(n))} />
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3 }}>{data.tagihan.totalBelumLunas} tagihan aktif</div>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3 }}>{data.tagihan.belumLunas} tagihan aktif</div>
           </div>
           <div style={{ padding: "18px 22px", borderRight: "1px solid var(--border)" }}>
             <div style={{ fontSize: 11, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-faint)", marginBottom: 6 }}>Laba {BULAN_ID[Number(bulanKpi) - 1]}</div>
@@ -319,7 +322,7 @@ export function Dashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: number) 
         <CashFlow series={data.arusKas} />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }} className="grid-2 kostku-rise">
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }} className="grid-2 kostku-rise" data-reveal>
         <Card>
           <SectionTitle sub="30 hari ke depan">Jatuh Tempo</SectionTitle>
           {data.jatuhTempo.length === 0 ? (

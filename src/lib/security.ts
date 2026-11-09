@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 
 /**
- * Rate-limit state kept outside the hot path — one integer counter per IP.
- * For single-server deployments this is sufficient. For multi-instance
- * deployments, swap this for a Redis-backed store.
+ * Rate-limit state kept outside the hot path — one counter per IP+endpoint.
+ * Endpoint terpisah agar navigasi wajar (dashboard + kamar + tagihan, dll)
+ * tidak saling makan kuota. Untuk multi-instance, ganti dengan Redis.
  */
 const ipCounts = new Map<string, { count: number; resetAt: number }>();
 
-const WINDOW_MS = 60_000; // 1 minute
-const MAX_REQUESTS = 30;   // per IP per window
+const WINDOW_MS = 60_000; // 1 menit
+const MAX_REQUESTS = 120; // per IP per endpoint per window
 
 function clientIp(req: NextRequest): string {
   return (
@@ -21,11 +21,13 @@ function clientIp(req: NextRequest): string {
 
 export function rateLimit(req: NextRequest): NextResponse | null {
   const ip = clientIp(req);
+  const endpoint = req.nextUrl.pathname;
+  const key = `${ip}|${endpoint}`;
   const now = Date.now();
-  const record = ipCounts.get(ip);
+  const record = ipCounts.get(key);
 
   if (!record || now > record.resetAt) {
-    ipCounts.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    ipCounts.set(key, { count: 1, resetAt: now + WINDOW_MS });
     return null;
   }
 

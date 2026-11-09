@@ -14,6 +14,8 @@ import { LaporanTahunanPage } from "@/components/pages/LaporanTahunan";
 import { PengaturanPage } from "@/components/pages/Pengaturan";
 import { PenyewaDetail } from "@/components/pages/PenyewaDetail";
 import { useTheme } from "@/lib/useTheme";
+import { useIdentitas } from "@/lib/identitas";
+import { FX } from "@/components/fx";
 import { BULAN_ID, HARI_ID } from "@/lib/format";
 
 export function Shell() {
@@ -21,7 +23,22 @@ export function Shell() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedPenyewaId, setSelectedPenyewaId] = useState<number | null>(null);
   const { theme, toggle, mounted } = useTheme();
+  const identitas = useIdentitas();
   const [tanggal, setTanggal] = useState("");
+
+  useEffect(() => {
+    // Otomatis bayar bulanan (opt-in di Pengaturan): sekali per periode
+    fetch("/api/pengaturan", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then(async (j: { auto_bayar?: boolean } | null) => {
+        if (!j || j.auto_bayar !== true) return;
+        const periode = new Date().toISOString().slice(0, 7);
+        if (localStorage.getItem("kostku-autobayar") === periode) return;
+        const res = await fetch(`/api/tagihan/bayar-semua?periode=${periode}`, { method: "POST" });
+        if (res.ok) localStorage.setItem("kostku-autobayar", periode);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     function update() {
@@ -45,7 +62,7 @@ export function Shell() {
       case "dashboard":
         return <Dashboard onSelectPenyewa={handleSelectPenyewa} />;
       case "modern":
-        return <ModernDashboard onSelectPenyewa={handleSelectPenyewa} />;
+        return <ModernDashboard onSelectPenyewa={handleSelectPenyewa} identitas={identitas} />;
       case "database":
         return <DatabaseKamar onSelectPenyewa={handleSelectPenyewa} />;
       case "input-sewa":
@@ -107,7 +124,9 @@ export function Shell() {
               <div style={{ fontFamily: "var(--font-display)", fontSize: 16.5, fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.15, color: "var(--sidebar-foreground)" }}>
                 <span style={{ color: "var(--sidebar-primary)" }}>Kost</span>Ku
               </div>
-              <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1 }}>Kos Perajin</div>
+              <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1, maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={identitas.alamat || undefined}>
+                {identitas.namaKos}
+              </div>
             </div>
           </div>
         </div>
@@ -287,7 +306,10 @@ export function Shell() {
           </div>
         </header>
 
-        <main className="kostku-sheet">{renderPage()}</main>
+        <main className="kostku-sheet">
+          {renderPage()}
+          <FX page={selectedPenyewaId !== null ? `penyewa-${selectedPenyewaId}` : page} />
+        </main>
       </div>
     </div>
   );
