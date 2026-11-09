@@ -135,7 +135,7 @@ export function LaporanTahunanPage() {
               <SectionTitle sub={`${bulanAktif} bulan`}>Rincian per Bulan</SectionTitle>
             </div>
             <div style={{ overflowX: "auto" }}>
-              <table>
+              <table style={{ minWidth: 560 }}>
                 <thead>
                   <tr>
                     <th>Bulan</th>

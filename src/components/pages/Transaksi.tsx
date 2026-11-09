@@ -314,7 +314,7 @@ export function TransaksiPage() {
           </div>
         ) : (
           <div style={{ overflowX: "auto" }}>
-            <table>
+            <table style={{ minWidth: 680 }}>
               <thead>
                 <tr>
                   <th>Tanggal</th>

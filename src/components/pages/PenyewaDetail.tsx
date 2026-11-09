@@ -132,7 +132,7 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
       <EmptyState>Belum ada transaksi</EmptyState>
     ) : (
       <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+      <table style={{ width: "100%", minWidth: 520, borderCollapse: "collapse", fontSize: 13 }}>
         <thead>
           <tr>
             <th>Tanggal</th>
@@ -239,12 +239,12 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
 
       {/* Riwayat kontrak */}
       <Card style={{ marginBottom: 16 }}>
-        <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>Riwayat Kontrak</h3>
+        <div style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 600, marginBottom: 12, color: "var(--foreground)" }}>Riwayat Kontrak</div>
         {kontrak.length === 0 ? (
           <EmptyState>Tidak ada riwayat kontrak</EmptyState>
         ) : (
           <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <table style={{ width: "100%", minWidth: 520, borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr>
                 <th>Kamar</th>
@@ -355,7 +355,7 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
           <EmptyState>Belum ada tagihan</EmptyState>
         ) : (
           <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+          <table style={{ width: "100%", minWidth: 520, borderCollapse: "collapse", fontSize: 13 }}>
             <thead>
               <tr>
                 <th>Periode</th>

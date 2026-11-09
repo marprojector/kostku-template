@@ -21,10 +21,10 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-lg border border-[var(--shadcn-border)] bg-[var(--card)] text-[var(--card-foreground)] shadow-sm",
+        "rounded-xl border border-[var(--shadcn-border)] bg-[var(--card)] text-[var(--card-foreground)] shadow-none",
         className
       )}
-      style={{ padding: "20px 22px", ...style }}
+      style={{ padding: "20px", ...style }}
     >
       {children}
     </div>
@@ -35,7 +35,7 @@ export function Card({
 export function SectionTitle({ children, sub }: { children: ReactNode; sub?: string }) {
   return (
     <div style={{ marginBottom: 12 }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 15.5, fontWeight: 700, letterSpacing: "-0.02em", color: "var(--foreground)" }}>{children}</div>
+      <div style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 600, letterSpacing: "-0.01em", color: "var(--foreground)" }}>{children}</div>
       {sub && <div style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 3 }}>{sub}</div>}
     </div>
   );
@@ -63,7 +63,7 @@ export function PageHeader({
       }}
     >
       <div>
-        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 23, fontWeight: 800, margin: 0, letterSpacing: "-0.03em", color: "var(--foreground)" }}>{title}</h1>
+        <h1 style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 600, margin: 0, letterSpacing: "-0.02em", color: "var(--foreground)" }}>{title}</h1>
         {sub && <div style={{ fontSize: 13, color: "var(--muted-foreground)", marginTop: 4 }}>{sub}</div>}
       </div>
       {actions && <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>{actions}</div>}
@@ -113,13 +113,13 @@ const VARIANTS: Record<Variant, CSSProperties> = {
     background: "var(--primary)",
     color: "var(--primary-foreground)",
     border: "1px solid var(--primary)",
-    boxShadow: "0 1px 2px rgba(23,27,36,0.12)",
+    boxShadow: "none",
   },
   secondary: {
     background: "var(--card)",
     color: "var(--foreground)",
     border: "1px solid var(--shadcn-border)",
-    boxShadow: "var(--shadow-kpi)",
+    boxShadow: "none",
   },
   ghost: { background: "transparent", color: "var(--muted-foreground)", border: "1px solid transparent" },
   success: {
@@ -189,7 +189,6 @@ export function Stat({
   value,
   sub,
   delta,
-  accent,
 }: {
   label: string;
   value: string;
@@ -209,32 +208,32 @@ export function Stat({
     isGood === null ? "var(--muted-foreground)" : isGood ? "var(--success)" : "var(--danger)";
 
   return (
-    <Card style={{ padding: 0, overflow: "hidden" }}>
-      <div style={{ height: 3, background: accent ?? "transparent", marginTop: -1 }} />
-      <div style={{ padding: "13px 18px 16px" }}>
+    <Card style={{ padding: "16px 18px", height: "100%" }}>
+      <div style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>{label}</div>
+      <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 600, lineHeight: 1.2, marginTop: 8, letterSpacing: "-0.02em", color: "var(--foreground)" }}>
+        {value}
+      </div>
+      {sub && <div style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 4 }}>{sub}</div>}
+      {delta && (
         <div
           style={{
-            fontSize: 11,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            fontSize: 12,
             fontWeight: 600,
-            textTransform: "uppercase",
-            letterSpacing: "0.05em",
-            color: "var(--muted-foreground)",
+            marginTop: 8,
+            padding: "2px 8px",
+            borderRadius: 999,
+            color: deltaColor,
+            background: isGood === null ? "var(--muted)" : isGood ? "var(--success-bg)" : "var(--danger-bg)",
           }}
         >
-          {label}
+          {deltaPositive ? "+" : ""}
+          {delta.value.toFixed(1)}
+          {delta.suffix ?? "%"}
         </div>
-        <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 26, fontWeight: 800, lineHeight: 1.12, marginTop: 6, letterSpacing: "-0.03em", color: "var(--foreground)" }}>
-          {value}
-        </div>
-        {sub && <div style={{ fontSize: 12, color: "var(--muted-foreground)", marginTop: 4 }}>{sub}</div>}
-        {delta && (
-          <div style={{ fontSize: 12, fontWeight: 600, marginTop: 5, color: deltaColor }}>
-            {deltaPositive ? "+" : ""}
-            {delta.value.toFixed(1)}
-            {delta.suffix ?? "%"}
-          </div>
-        )}
-      </div>
+      )}
     </Card>
   );
 }

@@ -129,13 +129,13 @@ export function DatabaseKamar({ onSelectPenyewa }: Props) {
             onClick={() => setFilter(f)}
             style={{
               padding: "7px 14px",
-              borderRadius: 8,
+              borderRadius: "calc(var(--radius-shadcn) - 2px)",
               fontSize: 13,
               fontWeight: 600,
               cursor: "pointer",
-              border: `1px solid ${filter === f ? "var(--primary)" : "var(--border)"}`,
-              background: filter === f ? "var(--primary)" : "var(--card-bg)",
-              color: filter === f ? "#fff" : "var(--text)",
+              border: `1px solid ${filter === f ? "var(--primary)" : "var(--shadcn-border)"}`,
+              background: filter === f ? "var(--primary)" : "var(--card)",
+              color: filter === f ? "var(--primary-foreground)" : "var(--foreground)",
             }}
           >
             {f === "semua" ? "Semua" : f === "terisi" ? "Terisi" : "Tersedia"} ({counts[f]})

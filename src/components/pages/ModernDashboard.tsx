@@ -2,10 +2,6 @@
 
 import * as React from "react";
 import {
-  BedDouble,
-  Wallet,
-  TrendingUp,
-  TrendingDown,
   CalendarDays,
   Sun,
   Moon,
@@ -73,8 +69,6 @@ interface StatDef {
   value: React.ReactNode;
   sub?: string;
   delta?: number;
-  icon: React.ReactNode;
-  iconClass: string;
 }
 
 function StatCard({ def, index }: { def: StatDef; index: number }) {
@@ -86,35 +80,21 @@ function StatCard({ def, index }: { def: StatDef; index: number }) {
       transition={{ duration: 0.35, delay: index * 0.06, ease: [0.2, 0, 0, 1] }}
     >
       <Card className="h-full">
-        <CardContent className="flex flex-col gap-3 p-5">
-          <div className="flex items-start justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ background: "var(--primary-soft)", color: "var(--primary)" }}>
-              {def.icon}
-            </div>
+        <CardContent className="flex flex-col gap-2 p-4">
+          <div className="text-xs text-[var(--muted-foreground)]">{def.label}</div>
+          <div className="text-2xl font-semibold tracking-tight tnum text-[var(--foreground)]">{def.value}</div>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted-foreground)]">
+            <span>{def.sub}</span>
             {def.delta !== undefined && (
-              <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold",
-                up ? "bg-[color-mix(in_srgb,var(--chart-3)_16%,transparent)] text-[var(--chart-3)]"
-                   : "bg-[color-mix(in_srgb,var(--chart-5)_16%,transparent)] text-[var(--chart-5)]")}>
-                {up ? <ArrowUpRightIcon /> : <ArrowDownIcon />}
+              <span className={cn("font-semibold", up ? "text-[var(--success)]" : "text-[var(--danger)]")}>
                 {up ? "+" : ""}{def.delta.toFixed(0)}%
               </span>
             )}
-          </div>
-          <div>
-            <div className="text-2xl font-bold tracking-tight tnum text-[var(--foreground)]">{def.value}</div>
-            <div className="mt-0.5 text-xs text-[var(--muted-foreground)]">{def.sub ?? def.label}</div>
           </div>
         </CardContent>
       </Card>
     </motion.div>
   );
-}
-
-function ArrowUpRightIcon() {
-  return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M7 17L17 7M9 7h8v8" /></svg>;
-}
-function ArrowDownIcon() {
-  return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"><path d="M7 7l10 10M17 9v8H9" /></svg>;
 }
 
 /* ---------- Okupansi + chart (pattern: total-sales area chart) ---------- */
@@ -135,12 +115,6 @@ function OkupansiCard({ data }: { data: DashboardStats }) {
         <div className="mt-6 h-[220px]">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data.arusKas} margin={{ left: -14, right: 8, top: 6, bottom: 0 }}>
-              <defs>
-                <linearGradient id="gradPdp" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--chart-1)" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="var(--chart-1)" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--shadcn-border)" vertical={false} />
               <XAxis dataKey="label" tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
               <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} tickFormatter={(v: number) => formatRupiahShort(v)} width={64} />
@@ -148,7 +122,7 @@ function OkupansiCard({ data }: { data: DashboardStats }) {
                 contentStyle={{ background: "var(--popover)", border: "1px solid var(--shadcn-border)", borderRadius: 10, fontSize: 12, color: "var(--popover-foreground)" }}
                 formatter={(v) => formatRupiah(Number(v))}
               />
-              <Area type="monotone" dataKey="pendapatan" name="Pendapatan" stroke="var(--chart-1)" strokeWidth={2.2} fill="url(#gradPdp)" />
+              <Area type="monotone" dataKey="pendapatan" name="Pendapatan" stroke="var(--chart-1)" strokeWidth={2.2} fill="color-mix(in srgb, var(--chart-1) 12%, transparent)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -273,30 +247,22 @@ export function ModernDashboard({ onSelectPenyewa, identitas }: { onSelectPenyew
       label: "Total Kamar",
       value: <CountUp value={data.okupansi.total} />,
       sub: `${data.okupansi.terisi} terisi · ${data.okupansi.tersedia} kosong`,
-      icon: <BedDouble size={20} />,
-      iconClass: "",
     },
     {
       label: "Okupansi",
       value: <CountUp value={Math.round(data.okupansi.persen)} format={(n) => `${Math.round(n)}%`} />,
       sub: `${data.okupansi.terisi}/${data.okupansi.total} kamar`,
-      icon: <TrendingUp size={20} />,
-      iconClass: "",
     },
     {
       label: `Pendapatan ${labelBulan}`,
       value: <CountUp value={k.pendapatan} format={(n) => formatRupiah(Math.round(n))} />,
       sub: k.bulanLalu > 0 ? `Bulan lalu ${formatRupiahShort(k.bulanLalu)}` : undefined,
       delta: k.bulanLalu > 0 ? deltaPdp : undefined,
-      icon: <Wallet size={20} />,
-      iconClass: "",
     },
     {
       label: "Tagihan Belum Lunas",
       value: <CountUp value={data.tagihan.belumLunas} />,
       sub: `Total ${formatRupiah(data.tagihan.totalBelumLunas)}`,
-      icon: <TrendingDown size={20} />,
-      iconClass: "",
     },
   ];
 

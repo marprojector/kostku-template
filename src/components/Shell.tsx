@@ -1,7 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { NAV, NavIcon, type PageId } from "@/components/nav";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  AlarmClock,
+  ArrowLeftRight,
+  BarChart3,
+  BedDouble,
+  CalendarDays,
+  ChevronDown,
+  LayoutGrid,
+  LogOut,
+  Menu,
+  Moon,
+  PanelLeft,
+  Receipt,
+  Search,
+  Settings,
+  Sun,
+  UserPlus,
+} from "lucide-react";
+import { NAV, type PageId } from "@/components/nav";
 import { Dashboard } from "@/components/pages/Dashboard";
 import { ModernDashboard } from "@/components/pages/ModernDashboard";
 import { DatabaseKamar } from "@/components/pages/DatabaseKamar";
@@ -18,13 +36,43 @@ import { useIdentitas } from "@/lib/identitas";
 import { FX } from "@/components/fx";
 import { BULAN_ID, HARI_ID } from "@/lib/format";
 
+/* Ikon per halaman (lucide, 18px) */
+const PAGE_ICON: Record<PageId, React.ReactNode> = {
+  dashboard: <LayoutGrid size={18} />,
+  modern: <BarChart3 size={18} />,
+  database: <BedDouble size={18} />,
+  "input-sewa": <UserPlus size={18} />,
+  tagihan: <Receipt size={18} />,
+  tunggakan: <AlarmClock size={18} />,
+  transaksi: <ArrowLeftRight size={18} />,
+  "laporan-bulanan": <CalendarDays size={18} />,
+  "laporan-tahunan": <BarChart3 size={18} />,
+  pengaturan: <Settings size={18} />,
+};
+
+const ALL_ITEMS = NAV.flatMap((g) => g.items);
+
+const BOTTOM_NAV: Array<{ id: PageId | "more"; label: string; icon: React.ReactNode }> = [
+  { id: "dashboard", label: "Beranda", icon: <LayoutGrid size={20} /> },
+  { id: "database", label: "Kamar", icon: <BedDouble size={20} /> },
+  { id: "tagihan", label: "Tagihan", icon: <Receipt size={20} /> },
+  { id: "transaksi", label: "Transaksi", icon: <ArrowLeftRight size={20} /> },
+  { id: "more", label: "Lainnya", icon: <Menu size={20} /> },
+];
+
 export function Shell() {
   const [page, setPage] = useState<PageId>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [cmdOpen, setCmdOpen] = useState(false);
+  const [cmdQuery, setCmdQuery] = useState("");
+  const [cmdIndex, setCmdIndex] = useState(0);
+  const [userMenu, setUserMenu] = useState(false);
   const [selectedPenyewaId, setSelectedPenyewaId] = useState<number | null>(null);
-  const { theme, toggle, mounted } = useTheme();
+  const { theme, toggle } = useTheme();
   const identitas = useIdentitas();
   const [tanggal, setTanggal] = useState("");
+  const cmdInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     // Posting pengeluaran rutin (kategori mode "otomatis") — idempoten per periode di server
@@ -33,11 +81,24 @@ export function Shell() {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setSidebarOpen(false);
+      if (e.key === "Escape") {
+        setSidebarOpen(false);
+        setUserMenu(false);
+        setCmdOpen(false);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setCmdOpen((v) => !v);
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  // Fokus otomatis ke input palette
+  useEffect(() => {
+    if (cmdOpen) requestAnimationFrame(() => cmdInputRef.current?.focus());
+  }, [cmdOpen]);
 
   // Kunci scroll body saat drawer terbuka di ponsel
   useEffect(() => {
@@ -58,6 +119,13 @@ export function Shell() {
     const timer = setInterval(update, 60_000);
     return () => clearInterval(timer);
   }, []);
+
+  function go(next: PageId) {
+    setSelectedPenyewaId(null);
+    setPage(next);
+    setSidebarOpen(false);
+    setCmdOpen(false);
+  }
 
   function handleSelectPenyewa(id: number) {
     setSelectedPenyewaId(id);
@@ -101,71 +169,83 @@ export function Shell() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  // Tutup menu user saat klik di luar
   useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setSidebarOpen(false);
+    if (!userMenu) return;
+    function onDown(e: MouseEvent) {
+      if (!(e.target as HTMLElement).closest(".kostku-menuwrap")) setUserMenu(false);
     }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [userMenu]);
+
+  const pageLabel = selectedPenyewaId !== null ? "Profil Penyewa" : ALL_ITEMS.find((i) => i.id === page)?.label ?? "";
+  const cmdResults = useMemo(() => {
+    const term = cmdQuery.trim().toLowerCase();
+    if (!term) return ALL_ITEMS;
+    return ALL_ITEMS.filter((i) => i.label.toLowerCase().includes(term));
+  }, [cmdQuery]);
+
+  function cmdKey(e: React.KeyboardEvent) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setCmdIndex((i) => Math.min(i + 1, cmdResults.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setCmdIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const item = cmdResults[cmdIndex];
+      if (item) go(item.id);
+    }
+  }
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg)" }}>
+      {/* ================= SIDEBAR ================= */}
       <aside
         className="kostku-sidebar"
         data-open={sidebarOpen ? "true" : "false"}
-        style={{
-          width: "var(--sidebar-w)",
-          flexShrink: 0,
-          background: "var(--sidebar)",
-          borderRight: "1px solid var(--sidebar-border)",
-          display: "flex",
-          flexDirection: "column",
-          position: "fixed",
-          inset: "0 auto 0 0",
-          zIndex: 40,
-        }}
+        data-collapsed={collapsed ? "true" : "false"}
+        aria-label="Navigasi utama"
       >
-        <div style={{ padding: "18px 18px 16px", borderBottom: "1px solid var(--sidebar-border)" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div className="kostku-brandmark" aria-hidden="true">K</div>
-            <div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 16.5, fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.15, color: "var(--sidebar-foreground)" }}>
-                <span style={{ color: "var(--sidebar-primary)" }}>Kost</span>Ku
-              </div>
-              <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1, maxWidth: 150, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={identitas.alamat || undefined}>
-                {identitas.namaKos}
-              </div>
+        <div style={{ padding: "14px 14px 12px", borderBottom: "1px solid var(--sidebar-border)", display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="kostku-brandmark" aria-hidden="true">K</div>
+          <div className="kostku-brand-text" style={{ minWidth: 0, flex: 1 }}>
+            <div style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 700, letterSpacing: "-0.02em", lineHeight: 1.15, color: "var(--sidebar-foreground)" }}>
+              <span style={{ color: "var(--primary)" }}>Kost</span>Ku
+            </div>
+            <div style={{ fontSize: 11, color: "var(--muted-foreground)", marginTop: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={identitas.alamat || undefined}>
+              {identitas.namaKos}
             </div>
           </div>
+          <button
+            className="kostku-trigger"
+            data-desktop="true"
+            onClick={() => setCollapsed((v) => !v)}
+            aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
+            title={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
+          >
+            <PanelLeft size={16} />
+          </button>
         </div>
 
-        <nav style={{ flex: 1, overflowY: "auto", padding: "10px 10px 16px" }} aria-label="Navigasi utama">
+        <nav style={{ flex: 1, overflowY: "auto", padding: "6px 10px 16px" }} aria-label="Menu">
           {NAV.map((group) => (
-            <div key={group.title} style={{ marginBottom: 6 }}>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.09em",
-                  color: "var(--muted-foreground)",
-                  padding: "12px 8px 6px",
-                }}
-              >
-                {group.title}
-              </div>
+            <div key={group.title} style={{ marginBottom: 4 }}>
+              <div className="kostku-navgroup">{group.title}</div>
               {group.items.map((item) => {
-                const active = page === item.id;
+                const active = page === item.id && selectedPenyewaId === null;
                 return (
                   <button
                     key={item.id}
-                    onClick={() => { setSelectedPenyewaId(null); setPage(item.id); setSidebarOpen(false); }}
+                    onClick={() => go(item.id)}
                     aria-current={active ? "page" : undefined}
                     className="kostku-navitem"
+                    title={item.label}
                   >
-                    <NavIcon id={item.id} />
-                    <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {PAGE_ICON[item.id]}
+                    <span className="kostku-navlabel" style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {item.label}
                     </span>
                   </button>
@@ -175,70 +255,26 @@ export function Shell() {
           ))}
         </nav>
 
-        <div style={{ padding: 12, borderTop: "1px solid var(--sidebar-border)" }}>
-          <div style={{ display: "grid", gap: 8 }}>
-            <button
-              onClick={toggle}
-              aria-label={theme === "dark" ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 9,
-                width: "100%",
-                padding: "9px 10px",
-                borderRadius: "var(--radius-shadcn)",
-                border: "1px solid var(--sidebar-border)",
-                background: "var(--sidebar)",
-                color: "var(--sidebar-foreground)",
-                cursor: "pointer",
-                fontSize: 13,
-                fontWeight: 500,
-              }}
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 18 18"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                aria-hidden="true"
-              >
-                {mounted && theme === "dark" ? (
-                  <>
-                    <circle cx="9" cy="9" r="3.2" />
-                    <path d="M9 2v1.6M9 14.4V16M2 9h1.6M14.4 9H16M4.2 4.2l1.1 1.1M12.7 12.7l1.1 1.1M13.8 4.2l-1.1 1.1M5.3 12.7l-1.1 1.1" />
-                  </>
-                ) : (
-                  <path d="M14.5 11.2A6 6 0 0 1 6.8 3.5a6 6 0 1 0 7.7 7.7Z" />
-                )}
-              </svg>
-              {mounted ? (theme === "dark" ? "Mode Terang" : "Mode Gelap") : "Tema"}
-            </button>
-            <button
-              onClick={async () => {
-                await fetch("/api/auth/logout", { method: "POST" });
-                window.location.reload();
-              }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 9,
-                width: "100%",
-                padding: "9px 10px",
-                borderRadius: "var(--radius-shadcn)",
-                border: "1px solid transparent",
-                background: "transparent",
-                color: "var(--muted-foreground)",
-                cursor: "pointer",
-                fontSize: 13,
-                fontWeight: 500,
-              }}
-            >
-              Keluar
-            </button>
-          </div>
+        <div className="kostku-sidefoot">
+          <button
+            onClick={toggle}
+            aria-label={theme === "dark" ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
+            title={theme === "dark" ? "Mode Terang" : "Mode Gelap"}
+          >
+            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            <span>{theme === "dark" ? "Mode Terang" : "Mode Gelap"}</span>
+          </button>
+          <button
+            onClick={async () => {
+              await fetch("/api/auth/logout", { method: "POST" });
+              window.location.reload();
+            }}
+            aria-label="Keluar"
+            title="Keluar"
+          >
+            <LogOut size={16} />
+            <span>Keluar</span>
+          </button>
         </div>
       </aside>
 
@@ -247,71 +283,100 @@ export function Shell() {
           onClick={() => setSidebarOpen(false)}
           className="kostku-overlay"
           aria-hidden="true"
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.42)", zIndex: 35 }}
+          style={{ position: "fixed", inset: 0, background: "rgba(15, 23, 42, 0.45)", zIndex: 35 }}
         />
       )}
 
-      <div className="kostku-main" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
-        <header
-          style={{
-            height: 58,
-            display: "flex",
-            alignItems: "center",
-            gap: 12,
-            padding: "0 20px",
-            background: "var(--sidebar)",
-            borderBottom: "1px solid var(--sidebar-border)",
-            position: "sticky",
-            top: 0,
-            zIndex: 20,
-          }}
-        >
+      {/* ================= MAIN ================= */}
+      <div className="kostku-main" data-collapsed={collapsed ? "true" : "false"}>
+        <header className="kostku-header">
           <button
-            onClick={() => setSidebarOpen((v) => !v)}
+            className="kostku-trigger"
+            data-mobile="true"
+            onClick={() => setSidebarOpen(true)}
             aria-label="Buka menu navigasi"
             aria-expanded={sidebarOpen}
-            className="kostku-menu-btn"
-            style={{
-              display: "none",
-              padding: 8,
-              border: "1px solid var(--sidebar-border)",
-              borderRadius: "var(--radius-shadcn)",
-              background: "transparent",
-              color: "var(--sidebar-foreground)",
-              cursor: "pointer",
-            }}
           >
-            <svg
-              width="17"
-              height="17"
-              viewBox="0 0 18 18"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <path d="M2.5 4.5h13M2.5 9h13M2.5 13.5h13" />
-            </svg>
+            <Menu size={18} />
           </button>
-          <div style={{ flex: 1 }} />
-          {selectedPenyewaId === null && (
-            <div
-              style={{
-                fontSize: 12,
-                fontWeight: 600,
-                color: "var(--muted-foreground)",
-                background: "var(--muted)",
-                padding: "5px 12px",
-                borderRadius: 999,
-                whiteSpace: "nowrap",
-              }}
+          <button
+            className="kostku-trigger"
+            data-desktop="true"
+            onClick={() => setCollapsed((v) => !v)}
+            aria-label={collapsed ? "Perluas sidebar" : "Ciutkan sidebar"}
+          >
+            <PanelLeft size={18} />
+          </button>
+
+          {/* Brand (mobile) / breadcrumb (desktop) */}
+          <div className="kostku-breadcrumb">
+            <span className="crumb-brand" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <span className="kostku-brandmark" style={{ width: 26, height: 26, fontSize: 12, borderRadius: 7 }} aria-hidden="true">K</span>
+              <b>KostKu</b>
+            </span>
+            <span className="crumb-page" style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+              <ChevronDown size={13} style={{ transform: "rotate(-90deg)", opacity: 0.6 }} />
+              <b>{pageLabel}</b>
+            </span>
+          </div>
+
+          <button
+            className="kostku-search"
+            onClick={() => { setCmdQuery(""); setCmdIndex(0); setCmdOpen(true); }}
+            aria-label="Cari halaman"
+          >
+            <Search size={14} />
+            <span>Cari halaman…</span>
+            <kbd>⌘K</kbd>
+          </button>
+
+          <button
+            className="kostku-iconbtn kostku-searchbtn"
+            onClick={() => { setCmdQuery(""); setCmdIndex(0); setCmdOpen(true); }}
+            aria-label="Cari halaman"
+          >
+            <Search size={17} />
+          </button>
+
+          <div className="kostku-header-actions">
+            <span style={{ fontSize: 12, color: "var(--muted-foreground)", whiteSpace: "nowrap", marginRight: 2 }} className="kostku-tanggal" suppressHydrationWarning>
+              {tanggal}
+            </span>
+            <button
+              className="kostku-iconbtn"
+              onClick={toggle}
+              aria-label={theme === "dark" ? "Aktifkan mode terang" : "Aktifkan mode gelap"}
+              title={theme === "dark" ? "Mode Terang" : "Mode Gelap"}
             >
-              {NAV.flatMap((g) => g.items).find((i) => i.id === page)?.label ?? ""}
+              {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+            </button>
+            <div className="kostku-menuwrap">
+              <button
+                className="kostku-avatar"
+                onClick={() => setUserMenu((v) => !v)}
+                aria-haspopup="menu"
+                aria-expanded={userMenu}
+                aria-label="Menu akun"
+              >
+                {(identitas.namaPemilik || "K")[0].toUpperCase()}
+              </button>
+              {userMenu && (
+                <div className="kostku-menu" role="menu">
+                  <div className="kostku-menu-head">
+                    <b>{identitas.namaPemilik}</b>
+                    <span>{identitas.namaKos}</span>
+                  </div>
+                  <button className="kostku-menu-item" role="menuitem" onClick={() => { toggle(); setUserMenu(false); }}>
+                    {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+                    {theme === "dark" ? "Mode Terang" : "Mode Gelap"}
+                  </button>
+                  <button className="kostku-menu-item" role="menuitem" data-danger="true" onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); window.location.reload(); }}>
+                    <LogOut size={15} />
+                    Keluar
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-          <div style={{ fontSize: 12.5, color: "var(--muted-foreground)", whiteSpace: "nowrap" }} suppressHydrationWarning>
-            {tanggal}
           </div>
         </header>
 
@@ -320,6 +385,70 @@ export function Shell() {
           <FX page={selectedPenyewaId !== null ? `penyewa-${selectedPenyewaId}` : page} />
         </main>
       </div>
+
+      {/* ================= BOTTOM NAV (mobile) ================= */}
+      <nav className="kostku-bottomnav" aria-label="Navigasi bawah">
+        <div className="kostku-bottomnav-inner">
+          {BOTTOM_NAV.map((item) => {
+            const active = item.id !== "more" && page === item.id && selectedPenyewaId === null;
+            return (
+              <button
+                key={item.id}
+                aria-current={active ? "page" : undefined}
+                aria-label={item.label}
+                onClick={() => {
+                  if (item.id === "more") {
+                    setSidebarOpen(true);
+                  } else {
+                    go(item.id);
+                  }
+                }}
+              >
+                {item.icon}
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
+      {/* ================= COMMAND PALETTE ================= */}
+      {cmdOpen && (
+        <div className="kostku-cmd-overlay" onClick={() => setCmdOpen(false)}>
+          <div className="kostku-cmd" role="dialog" aria-label="Cari halaman" onClick={(e) => e.stopPropagation()}>
+            <div className="kostku-cmd-input">
+              <Search size={15} />
+              <input
+                ref={cmdInputRef}
+                value={cmdQuery}
+                onChange={(e) => { setCmdQuery(e.target.value); setCmdIndex(0); }}
+                onKeyDown={cmdKey}
+                placeholder="Ketik nama halaman…"
+                aria-label="Cari halaman"
+              />
+              <kbd style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 10.5, border: "1px solid var(--shadcn-border)", borderRadius: 4, padding: "1px 5px", color: "var(--muted-foreground)" }}>ESC</kbd>
+            </div>
+            <div className="kostku-cmd-list">
+              {cmdResults.length === 0 ? (
+                <div className="kostku-cmd-empty">Tidak ada halaman yang cocok.</div>
+              ) : (
+                cmdResults.map((item, i) => (
+                  <button
+                    key={item.id}
+                    className="kostku-cmd-item"
+                    data-active={i === cmdIndex}
+                    onMouseEnter={() => setCmdIndex(i)}
+                    onClick={() => go(item.id)}
+                  >
+                    {PAGE_ICON[item.id]}
+                    {item.label}
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

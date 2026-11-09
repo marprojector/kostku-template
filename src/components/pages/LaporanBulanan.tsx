@@ -154,8 +154,8 @@ export function LaporanBulananPage() {
                           <span>{kat}</span>
                           <span className="tnum">{formatRupiah(nominal)}</span>
                         </div>
-                        <div style={{ height: 8, background: "var(--bg-strong)", borderRadius: 5, overflow: "hidden" }}>
-                          <div style={{ height: "100%", width: `${lebar}%`, background: "var(--danger)", borderRadius: 5 }} />
+                        <div style={{ height: 8, background: "var(--surface-2)", borderRadius: 3, overflow: "hidden" }}>
+                          <div style={{ height: "100%", width: `${lebar}%`, background: "var(--danger)", borderRadius: 3 }} />
                         </div>
                       </div>
                     );
