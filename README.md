@@ -70,7 +70,7 @@ src/
 │   ├── types.ts              # tipe domain
 │   ├── useApi.ts             # fetch hook (loading/error/reload)
 │   └── useTheme.ts           # tema terang/gelap persisten
-└── middleware.ts             # proteksi seluruh /api/*
+└── proxy.ts                  # proteksi seluruh /api/*
 ```
 
 ## Halaman

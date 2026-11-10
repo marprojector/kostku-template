@@ -4,7 +4,7 @@ import { jwtVerify } from "jose";
 const rawSecret = process.env.AUTH_SECRET;
 const secret = rawSecret && rawSecret.length >= 32 ? new TextEncoder().encode(rawSecret) : null;
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const publicPath = pathname === "/api/auth/login" || pathname === "/api/auth/me" || pathname === "/api/auth/logout";
   if (publicPath) return NextResponse.next();
