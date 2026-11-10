@@ -139,7 +139,7 @@ Runtime protections included:
    chmod 600 .env.production
    ```
 
-   Set a unique `AUTH_SECRET` (at least 32 random characters), a non-default owner email/password, `NODE_ENV=production`, and `SEED_DATABASE=false`.
+   Set a unique `AUTH_SECRET` (at least 32 random characters), a non-default owner email/password, `NODE_ENV=production`, `TZ=Asia/Makassar` (sesuaikan zona bisnis), and `SEED_DATABASE=false`.
 3. Install on the target architecture and rebuild the native SQLite module:
 
    ```bash

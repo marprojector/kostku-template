@@ -9,6 +9,7 @@ services:
       - .env.production
     environment:
       NODE_ENV: production
+      TZ: Asia/Makassar
       KOSTKU_DB_PATH: /app/data/kostku.db
       KOSTKU_BACKUP_DIR: /app/backups
       SEED_DATABASE: "false"

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { seedDatabase } from "@/lib/seed";
 import { rateLimit } from "@/lib/security";
+import { isoPeriode } from "@/lib/format";
 
 // GET /api/laporan/bulanan?periode=2026-11
 export async function GET(req: NextRequest) {
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest) {
   const periodeParam = searchParams.get("periode");
   const periode = periodeParam && /^\d{4}-\d{2}$/.test(periodeParam)
     ? periodeParam
-    : new Date().toLocaleDateString("sv-SE").slice(0, 7);
+    : isoPeriode();
   const [tahun, bulan] = periode.split("-");
 
   // Pendapatan
@@ -49,7 +50,7 @@ export async function GET(req: NextRequest) {
 
   // Bulan lalu
   const bl = new Date(Number(tahun), Number(bulan) - 2, 1);
-  const blStr = bl.toISOString().slice(0, 7);
+  const blStr = isoPeriode(bl);
   const pdpBl = db.prepare(`
     SELECT COALESCE(SUM(nominal), 0) as total FROM transaksi
     WHERE tipe = 'pemasukan' AND tanggal LIKE ?

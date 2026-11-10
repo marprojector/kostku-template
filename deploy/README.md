@@ -38,7 +38,7 @@ sudo systemctl status kostku
 Run as the application user at least once per day:
 
 ```cron
-15 2 * * * cd /opt/kostku && /usr/bin/npm run backup >> /var/log/kostku-backup.log 2>&1
+15 2 * * * cd /opt/kostku && KOSTKU_DB_PATH=/var/lib/kostku/kostku.db KOSTKU_BACKUP_DIR=/var/backups/kostku /usr/bin/npm run backup >> /var/log/kostku-backup.log 2>&1
 ```
 
 Copy `/var/backups/kostku` to separate encrypted storage. A local backup alone is not disaster recovery.

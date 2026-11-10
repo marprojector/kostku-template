@@ -10,6 +10,7 @@ WorkingDirectory=/opt/kostku
 EnvironmentFile=/opt/kostku/.env.production
 Environment=NODE_ENV=production
 Environment=PORT=3000
+Environment=TZ=Asia/Makassar
 Environment=KOSTKU_DB_PATH=/var/lib/kostku/kostku.db
 Environment=KOSTKU_BACKUP_DIR=/var/backups/kostku
 ExecStart=/usr/bin/node /opt/kostku/.next/standalone/server.js

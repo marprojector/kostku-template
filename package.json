@@ -10,7 +10,7 @@
     "rebuild-native": "npm rebuild better-sqlite3",
     "backup": "node scripts/backup-db.cjs",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",

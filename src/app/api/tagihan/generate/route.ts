@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { rateLimit, sanitizeString } from "@/lib/security";
+import { isoPeriode } from "@/lib/format";
 
 export async function POST(req: NextRequest) {
   const limited = rateLimit(req);
   if (limited) return limited;
 
-  let periode = new Date().toISOString().slice(0, 7);
+  let periode = isoPeriode();
   if (req.headers.get("content-type")?.includes("application/json")) {
     const raw = (await req.json().catch(() => ({}))) as { periode?: unknown };
     const parsed = typeof raw.periode === "string" ? raw.periode.trim() : "";
@@ -79,7 +80,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const periode = sanitizeString(searchParams.get("periode"), 7) ?? new Date().toISOString().slice(0, 7);
+  const periode = sanitizeString(searchParams.get("periode"), 7) ?? isoPeriode();
   if (!/^\d{4}-\d{2}$/.test(periode)) {
     return NextResponse.json({ error: "Format periode tidak valid (YYYY-MM)" }, { status: 400 });
   }

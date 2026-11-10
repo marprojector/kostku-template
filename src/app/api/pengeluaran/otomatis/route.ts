@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { rateLimit } from "@/lib/security";
+import { isoDate, isoPeriode } from "@/lib/format";
 import { normalizeKategori, readKategoriRaw } from "@/lib/kategori";
 
 // POST /api/pengeluaran/otomatis — posting pengeluaran rutin dari kategori mode "otomatis"
@@ -16,8 +17,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, dibuat: 0, dilewati: 0 });
   }
 
-  const periode = new Date().toISOString().slice(0, 7);
-  const today = new Date().toLocaleDateString("sv-SE");
+  const periode = isoPeriode();
+  const today = isoDate();
 
   let dibuat = 0;
   let dilewati = 0;
