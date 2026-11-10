@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { rateLimit, sanitizeString } from "@/lib/security";
 
-// POST /api/tagihan/generate — buat tagihan untuk semua kontrak aktif pada periode tertentu
 export async function POST(req: NextRequest) {
   const limited = rateLimit(req);
   if (limited) return limited;
@@ -20,18 +19,38 @@ export async function POST(req: NextRequest) {
   }
 
   const db = getDb();
-  const kontrakAktif = db.prepare("SELECT id, kamar_id, nominal FROM kontrak_sewa WHERE status = 'aktif'").all() as Array<{ id: number; kamar_id: number; nominal: number }>;
-  if (kontrakAktif.length === 0) {
-    return NextResponse.json({ ok: true, dibuat: 0, dilewati: 0, periode });
+  const kontrakAktif = db.prepare(
+    "SELECT id, kamar_id, nominal, tanggal_masuk FROM kontrak_sewa WHERE status = 'aktif'"
+  ).all() as Array<{ id: number; kamar_id: number; nominal: number; tanggal_masuk: string }>;
+
+  // Hanya proses kontrak yang bulan tanggal_masuk <= periode (kontrak yang belum mulai dilewati).
+  const eligible = kontrakAktif.filter((k) => {
+    const mulai = typeof k.tanggal_masuk === "string" ? k.tanggal_masuk.slice(0, 7) : "";
+    return /^\d{4}-\d{2}$/.test(mulai) && mulai <= periode;
+  });
+
+  if (eligible.length === 0) {
+    return NextResponse.json({ ok: true, periode, dibuat: 0, dilewati: 0 });
   }
 
   const existing = db.prepare(
-    `SELECT kontrak_id FROM tagihan WHERE periode = ? AND kontrak_id IN (${kontrakAktif.map(() => "?").join(",")})`
-  ).all(periode, ...kontrakAktif.map((k) => k.id)) as Array<{ kontrak_id: number }>;
+    `SELECT kontrak_id FROM tagihan WHERE periode = ? AND kontrak_id IN (${eligible.map(() => "?").join(",")})`
+  ).all(periode, ...eligible.map((k) => k.id)) as Array<{ kontrak_id: number }>;
   const sudahAda = new Set(existing.map((e) => e.kontrak_id));
 
-  // Jatuh tempo: tanggal 8 bulan periode
-  const jatuhTempo = `${periode}-08`;
+  // Jatuh tempo = tanggal yang sama dengan tanggal_masuk, pada bulan setelah periode.
+  // Clamp ke akhir bulan jika tanggal tidak ada.
+  const hitungJatuhTempo = (tanggalMasuk: string): string => {
+    const hari = Number(tanggalMasuk.slice(8, 10));
+    const [periodeTahun, periodeBulan] = periode.split("-").map(Number);
+    const target = new Date(periodeTahun, periodeBulan, 1);
+    const targetTahun = target.getFullYear();
+    const targetBulan = target.getMonth();
+    const akhirBulan = new Date(targetTahun, targetBulan + 1, 0).getDate();
+    const hariAman = Math.min(hari, akhirBulan);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${targetTahun}-${pad(targetBulan + 1)}-${pad(hariAman)}`;
+  };
 
   const insert = db.prepare(
     `INSERT INTO tagihan (kontrak_id, periode, nominal, jatuh_tempo, status, created_at)
@@ -39,24 +58,25 @@ export async function POST(req: NextRequest) {
   );
   const generate = db.transaction(() => {
     let dibuat = 0;
-    for (const k of kontrakAktif) {
+    for (const k of eligible) {
       if (sudahAda.has(k.id)) continue;
-      insert.run(k.id, periode, k.nominal, jatuhTempo);
+      insert.run(k.id, periode, k.nominal, hitungJatuhTempo(k.tanggal_masuk));
       dibuat++;
     }
     return dibuat;
   });
 
   const dibuat = generate();
+  const dilewati = eligible.filter((k) => sudahAda.has(k.id)).length;
+
   return NextResponse.json({
     ok: true,
     periode,
     dibuat,
-    dilewati: kontrakAktif.length - dibuat,
+    dilewati,
   });
 }
 
-// GET /api/tagihan/generate — pratinjau kontrak yang akan ditagih
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const periode = sanitizeString(searchParams.get("periode"), 7) ?? new Date().toISOString().slice(0, 7);
@@ -65,10 +85,14 @@ export async function GET(req: NextRequest) {
   }
 
   const db = getDb();
-  const kontrakAktif = db.prepare("SELECT COUNT(*) as c FROM kontrak_sewa WHERE status = 'aktif'").get() as { c: number };
-  const sudahAda = db.prepare(
-    "SELECT COUNT(*) as c FROM tagihan WHERE periode = ?"
+  const kontrakAktif = db.prepare(
+    "SELECT COUNT(*) as c FROM kontrak_sewa WHERE status = 'aktif' AND substr(tanggal_masuk, 1, 7) <= ?"
   ).get(periode) as { c: number };
+  const sudahAda = db.prepare(
+    `SELECT COUNT(*) as c FROM tagihan t
+     JOIN kontrak_sewa ks ON ks.id = t.kontrak_id
+     WHERE t.periode = ? AND ks.status = 'aktif' AND substr(ks.tanggal_masuk, 1, 7) <= ?`
+  ).get(periode, periode) as { c: number };
 
   return NextResponse.json({
     periode,
