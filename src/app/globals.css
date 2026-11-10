@@ -216,6 +216,11 @@ h1, h2, h3 {
 }
 
 /* ---------- Logo brand: swap light/dark ---------- */
+.kostku-logo-lockup {
+  display: inline-flex;
+  line-height: 0;
+  flex-shrink: 0;
+}
 .kostku-logo-light {
   display: block;
 }
@@ -227,6 +232,29 @@ h1, h2, h3 {
 }
 [data-theme="dark"] .kostku-logo-dark {
   display: block;
+}
+
+/* Header brand sidebar: padding di CSS agar bisa di-override saat collapsed */
+.kostku-brand-header {
+  padding: 14px 14px 12px;
+}
+
+/* Collapsed sidebar (desktop): ganti lockup dengan ikon saja, di tengah */
+.kostku-logo-collapsed {
+  display: none;
+}
+@media (min-width: 901px) {
+  .kostku-sidebar[data-collapsed="true"] .kostku-logo-expanded {
+    display: none;
+  }
+  .kostku-sidebar[data-collapsed="true"] .kostku-logo-collapsed {
+    display: block;
+  }
+  .kostku-sidebar[data-collapsed="true"] .kostku-brand-header {
+    justify-content: center;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
 }
 
 /* ---------- Focus ---------- */

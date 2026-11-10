@@ -9,7 +9,7 @@ export interface Identitas {
 }
 
 export const DEFAULT_IDENTITAS: Identitas = {
-  namaKos: "Kos Perajin",
+  namaKos: "KostKu - Ammar",
   alamat: "",
   namaPemilik: "Ammar",
 };

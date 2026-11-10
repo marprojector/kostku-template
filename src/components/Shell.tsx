@@ -210,8 +210,10 @@ export function Shell() {
         data-collapsed={collapsed ? "true" : "false"}
         aria-label="Navigasi utama"
       >
-        <div style={{ padding: "14px 14px 12px", borderBottom: "1px solid var(--sidebar-border)", display: "flex", alignItems: "center", gap: 10 }}>
-          <KostKuLogo variant="compact" height={38} />
+        <div className="kostku-brand-header" style={{ borderBottom: "1px solid var(--sidebar-border)", display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Expanded: logo + wordmark. Collapsed (desktop): ikon saja. */}
+          <KostKuLogo variant="compact" height={38} className="kostku-logo-expanded" />
+          <KostKuLogo variant="icon" height={34} className="kostku-logo-collapsed" />
           <div className="kostku-brand-text" style={{ minWidth: 0 }}>
             <div style={{ fontSize: 11, color: "var(--muted-foreground)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={identitas.alamat || undefined}>
               {identitas.namaKos}

@@ -29,7 +29,7 @@ export function KostKuLogo({
   className?: string;
 }) {
   const src = SRC[variant];
-  const style: React.CSSProperties = { height, width: "auto" };
+  const style: React.CSSProperties = { height, width: "auto", flexShrink: 0, objectFit: "contain" };
   if (variant === "icon") {
     return (
       // eslint-disable-next-line @next/next/no-img-element
@@ -37,7 +37,7 @@ export function KostKuLogo({
     );
   }
   return (
-    <span className={className} style={{ display: "inline-flex", lineHeight: 0 }} aria-label="KostKu">
+    <span className={`kostku-logo-lockup ${className ?? ""}`} aria-label="KostKu">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src.light} alt="KostKu" className={`kostku-logo-light ${className ?? ""}`} style={style} />
       {/* eslint-disable-next-line @next/next/no-img-element */}

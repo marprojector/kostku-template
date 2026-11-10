@@ -168,7 +168,7 @@ function ArusKasCard({ data }: { data: DashboardStats }) {
 
 /* ---------- Tagihan jatuh tempo (pattern: recent-orders table) ---------- */
 function JatuhTempoCard({ data, onOpenPenyewa }: { data: DashboardStats; onOpenPenyewa?: (id: number) => void }) {
-  const rows = [...data.lewat, ...data.jatuhTempo].slice(0, 6);
+  const rows = [...data.lewat, ...data.jatuhTempo].slice(0, 4);
   const hariIni = new Date().toISOString().slice(0, 10);
   return (
     <Card className="col-span-12">
@@ -182,30 +182,37 @@ function JatuhTempoCard({ data, onOpenPenyewa }: { data: DashboardStats; onOpenP
         {rows.length === 0 ? (
           <div className="px-6 pb-6 text-sm text-[var(--muted-foreground)]">Semua tagihan lunas — tidak ada jatuh tempo.</div>
         ) : (
-          <div className="overflow-hidden">
-            {rows.map((t, i) => {
-              const telat = t.jatuhTempo < hariIni;
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => t.penyewaId && onOpenPenyewa?.(t.penyewaId)}
-                  className={cn(
-                    "flex w-full items-center justify-between gap-3 px-6 py-3 text-left transition-colors hover:bg-[var(--accent)] cursor-pointer",
-                    i > 0 && "border-t border-[var(--shadcn-border)]"
-                  )}
-                >
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium text-[var(--foreground)]">{t.nama_penyewa} <span className="text-[var(--muted-foreground)]">· {t.kamar_nomor}</span></div>
-                    <div className="text-xs text-[var(--muted-foreground)]">Jatuh tempo {t.jatuhTempo}</div>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-3">
-                    <span className="text-sm font-semibold tnum text-[var(--foreground)]">{formatRupiah(t.nominal)}</span>
-                    <Badge variant={telat ? "destructive" : "secondary"}>{telat ? "Lewat tempo" : "Segera"}</Badge>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+          <>
+            <div className="overflow-y-auto" style={{ maxHeight: 320 }}>
+              {rows.map((t, i) => {
+                const telat = t.jatuhTempo < hariIni;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => t.penyewaId && onOpenPenyewa?.(t.penyewaId)}
+                    className={cn(
+                      "flex w-full items-center justify-between gap-3 px-6 py-3 text-left transition-colors hover:bg-[var(--accent)] cursor-pointer",
+                      i > 0 && "border-t border-[var(--shadcn-border)]"
+                    )}
+                  >
+                    <div className="min-w-0">
+                      <div className="truncate text-sm font-medium text-[var(--foreground)]">{t.nama_penyewa} <span className="text-[var(--muted-foreground)]">· {t.kamar_nomor}</span></div>
+                      <div className="text-xs text-[var(--muted-foreground)]">Jatuh tempo {t.jatuhTempo}</div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className="text-sm font-semibold tnum text-[var(--foreground)] whitespace-nowrap">{formatRupiah(t.nominal)}</span>
+                      <Badge variant={telat ? "destructive" : "secondary"}>{telat ? "Lewat" : "Segera"}</Badge>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="border-t border-[var(--shadcn-border)] px-6 py-2.5">
+              <a href="#" onClick={(e) => { e.preventDefault(); /* navigate to tunggakan */ }} className="text-xs text-[var(--primary)] hover:underline">
+                Lihat semua tunggakan →
+              </a>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
