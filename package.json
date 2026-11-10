@@ -10,7 +10,8 @@
     "rebuild-native": "npm rebuild better-sqlite3",
     "backup": "node scripts/backup-db.cjs",
     "lint": "eslint",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "TZ=Asia/Makassar node --import tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",
@@ -35,6 +36,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.5",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }
