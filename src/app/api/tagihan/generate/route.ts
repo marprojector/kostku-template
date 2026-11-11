@@ -34,8 +34,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, periode, dibuat: 0, dilewati: 0 });
   }
 
+  const placeholders = eligible.map(() => "?");
   const existing = db.prepare(
-    `SELECT kontrak_id FROM tagihan WHERE periode = ? AND kontrak_id IN (${eligible.map(() => "?")})
+    `SELECT kontrak_id FROM tagihan WHERE periode = ? AND kontrak_id IN (${placeholders.join(",")})`
   ).all(periode, ...eligible.map((k) => k.id)) as Array<{ kontrak_id: number }>;
   const sudahAda = new Set(existing.map((e) => e.kontrak_id));
 
