@@ -1,7 +1,9 @@
 {
-  "name": "kostku",
-  "version": "0.1.0",
+  "name": "kostku-template",
+  "version": "1.0.0",
   "private": true,
+  "description": "Template manajemen kos: kamar, penyewa, tagihan, keuangan, dan WhatsApp.",
+  "author": "Ammar (https://github.com/marprojector)",
   "scripts": {
     "dev": "next dev",
     "build": "npm run typecheck && next build",

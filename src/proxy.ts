@@ -6,7 +6,12 @@ const secret = rawSecret && rawSecret.length >= 32 ? new TextEncoder().encode(ra
 
 export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const publicPath = pathname === "/api/auth/login" || pathname === "/api/auth/me" || pathname === "/api/auth/logout";
+  const publicPath =
+    pathname === "/api/auth/login" ||
+    pathname === "/api/auth/register" ||
+    pathname === "/api/auth/status" ||
+    pathname === "/api/auth/me" ||
+    pathname === "/api/auth/logout";
   if (publicPath) return NextResponse.next();
 
   if (process.env.NODE_ENV === "production" && !secret) {

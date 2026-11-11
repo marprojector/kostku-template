@@ -1,7 +1,7 @@
 import { getDb } from "./db";
 
 export function seedDatabase() {
-  if (process.env.NODE_ENV === "production" && process.env.SEED_DATABASE !== "true") return;
+  if (process.env.SEED_DATABASE !== "true") return;
 
   const db = getDb();
 

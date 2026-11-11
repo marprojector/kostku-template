@@ -1,14 +1,14 @@
-# PRD — KostKu: Website Manajemen Kos "Kos Perajin"
+# PRD — KostKu: Template Website Manajemen Kos
 
 > Versi: 2.0 (lengkap) | Tanggal: 6 November 2026 | Author: Ammar
-> Basis: reverse-engineering 4 screenshot aplikasi existing "Kos Perajin"
+> Basis: reverse-engineering 4 screenshot aplikasi kos existing
 
 ---
 
 ## 1. Overview
 
 ### 1.1 Tujuan Produk
-Platform web untuk mengelola kos "Kos Perajin" milik Ammar. Fungsi utama:
+Platform web untuk mengelola kos. Fungsi utama:
 - Monitoring okupansi & keuangan real-time
 - Manajemen kamar & penyewa
 - Pengingat tagihan otomatis via WhatsApp
@@ -22,7 +22,7 @@ Pengelolaan kos saat ini masih manual (spreadsheet/notes), menyebabkan:
 - Kesulitan monitoring okupansi per bulan
 
 ### 1.3 Target Users
-- **Primary:** Owner kos (Ammar) — untuk management daily
+- **Primary:** Owner kos — untuk management daily
 - **Secondary:** Penyewa kos — untuk melihat tagihan & histori
 
 ---
@@ -650,4 +650,4 @@ Response :
 
 ---
 
-*PRD ini dibuat berdasarkan reverse-engineering screenshot aplikasi "Kos Perajin" yang sedang dipakai. Nama, harga, dan angka adalah data contoh dari screenshot asli.*
+*PRD ini dibuat berdasarkan reverse-engineering screenshot aplikasi kos yang sedang dipakai. Nama, harga, dan angka adalah data contoh dari screenshot asli.*

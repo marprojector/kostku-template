@@ -141,7 +141,7 @@ export async function GET(req: NextRequest) {
       total: totalKamar.c,
       terisi: kamarTerisi.c,
       tersedia: totalKamar.c - kamarTerisi.c,
-      persen: Math.round((kamarTerisi.c / totalKamar.c) * 100),
+      persen: totalKamar.c > 0 ? Math.round((kamarTerisi.c / totalKamar.c) * 100) : 0,
     },
     kamar: kamarRows.map((r) => {
       // Tagihan telat (apapun periode) menang — sinkron dengan halaman Tunggakan

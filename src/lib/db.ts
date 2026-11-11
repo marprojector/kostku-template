@@ -76,6 +76,15 @@ function initSchema(db: Database.Database) {
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
 
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      nama TEXT NOT NULL,
+      password_hash TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'owner' CHECK (role IN ('owner')),
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
     CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL,
@@ -104,8 +113,8 @@ function initSchema(db: Database.Database) {
     insert.run("kategori_pengeluaran", JSON.stringify([
       "Listrik", "WiFi / Internet", "Gaji", "Perlengkapan Operasional", "Maintenance"
     ]));
-    insert.run("nama_kos", "Kos Perajin");
+    insert.run("nama_kos", "KostKu");
     insert.run("alamat", "");
-    insert.run("nama_pemilik", "Ammar");
+    insert.run("nama_pemilik", "");
   }
 }

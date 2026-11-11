@@ -41,7 +41,7 @@ test("initSchema membuat semua tabel yang dibutuhkan", async () => {
     .all() as { name: string }[];
   const tables = rows.map((r) => r.name);
 
-  for (const tabel of ["kamar", "penyewa", "kontrak_sewa", "tagihan", "transaksi", "settings", "wa_log"]) {
+  for (const tabel of ["kamar", "penyewa", "kontrak_sewa", "tagihan", "transaksi", "settings", "wa_log", "users"]) {
     assert.ok(tables.includes(tabel), `tabel ${tabel} harus ada`);
   }
 
@@ -68,7 +68,7 @@ test("settings default di-seed saat database kosong", async () => {
     | { value: string }
     | undefined;
   assert.ok(row, "settings nama_kos harus ada");
-  assert.equal(row.value, "Kos Perajin");
+  assert.equal(row.value, "KostKu");
 
   const kategori = db.prepare("SELECT value FROM settings WHERE key = ?").get("kategori_pengeluaran") as
     | { value: string }

@@ -16,20 +16,37 @@ const labelStyle = {
 
 export function LoginGate({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<"checking" | "guest" | "authed">("checking");
+  const [needsSetup, setNeedsSetup] = useState(false);
   const identitas = useIdentitas();
+  const [nama, setNama] = useState("");
+  const [namaKos, setNamaKos] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     let active = true;
-    fetch("/api/auth/me", { cache: "no-store" })
-      .then((res) => ({ ok: res.ok }))
-      .catch(() => ({ ok: false }))
-      .then(({ ok }) => {
-        if (active) setState(ok ? "authed" : "guest");
-      });
+    (async () => {
+      try {
+        const me = await fetch("/api/auth/me", { cache: "no-store" });
+        if (me.ok) {
+          if (active) setState("authed");
+          return;
+        }
+        const res = await fetch("/api/auth/status", { cache: "no-store" });
+        const json = res.ok ? ((await res.json()) as { needsSetup?: boolean }) : {};
+        if (!active) return;
+        setNeedsSetup(Boolean(json.needsSetup));
+        setState("guest");
+      } catch {
+        if (active) {
+          setNeedsSetup(false);
+          setState("guest");
+        }
+      }
+    })();
     return () => {
       active = false;
     };
@@ -38,20 +55,32 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (needsSetup) {
+      if (password.length < 8) {
+        setError("Password minimal 8 karakter");
+        return;
+      }
+      if (password !== confirm) {
+        setError("Konfirmasi password tidak cocok");
+        return;
+      }
+    }
+
     setSubmitting(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch(needsSetup ? "/api/auth/register" : "/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(needsSetup ? { nama, namaKos, email, password } : { email, password }),
       });
       if (!res.ok) {
         const json = await res.json().catch(() => ({}));
-        throw new Error(json.error ?? "Gagal masuk");
+        throw new Error((json as { error?: string }).error ?? "Gagal memproses");
       }
       setState("authed");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal masuk");
+      setError(err instanceof Error ? err.message : "Gagal memproses");
     } finally {
       setSubmitting(false);
     }
@@ -114,7 +143,7 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
               ))}
             </div>
           </div>
-          <div style={{ fontSize: 12, opacity: 0.7 }}>{identitas.namaKos} · {identitas.namaPemilik}</div>
+          <div style={{ fontSize: 12, opacity: 0.7 }}>{identitas.namaKos || "KostKu"} · dibuat oleh Ammar</div>
         </aside>
 
         {/* Form */}
@@ -123,23 +152,53 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, marginBottom: 24, textAlign: "center" }}>
               <KostKuLogo variant="full" height={44} />
               <div style={{ fontSize: 12, color: "var(--muted-foreground)" }}>
-                {identitas.namaKos}
+                {identitas.namaKos || "KostKu"}
               </div>
             </div>
 
             <h1 style={{ fontFamily: "var(--font-display)", fontSize: 22, fontWeight: 600, letterSpacing: "-0.02em", margin: "0 0 6px", color: "var(--foreground)", textAlign: "center" }}>
-              Masuk ke akun Anda
+              {needsSetup ? "Buat akun owner" : "Masuk ke akun Anda"}
             </h1>
             <p style={{ fontSize: 13.5, color: "var(--muted-foreground)", margin: "0 0 22px", textAlign: "center" }}>
-              Lanjutkan mengelola {identitas.namaKos}.
+              {needsSetup
+                ? "Instalasi baru. Akun pertama otomatis menjadi owner."
+                : `Lanjutkan mengelola ${identitas.namaKos || "kos Anda"}.`}
             </p>
 
             <form onSubmit={submit} style={{ display: "grid", gap: 14 }}>
+              {needsSetup && (
+                <>
+                  <div>
+                    <label htmlFor="setup-nama" style={labelStyle}>Nama pemilik</label>
+                    <input
+                      id="setup-nama"
+                      type="text"
+                      autoComplete="name"
+                      value={nama}
+                      onChange={(e) => setNama(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="setup-nama-kos" style={labelStyle}>Nama kos</label>
+                    <input
+                      id="setup-nama-kos"
+                      type="text"
+                      autoComplete="organization"
+                      placeholder="Contoh: Kos Melati"
+                      value={namaKos}
+                      onChange={(e) => setNamaKos(e.target.value)}
+                      required
+                    />
+                  </div>
+                </>
+              )}
+
               <div>
-                <label htmlFor="login-email" style={labelStyle}>Username</label>
+                <label htmlFor="login-email" style={labelStyle}>Email</label>
                 <input
                   id="login-email"
-                  type="text"
+                  type="email"
                   autoComplete="username"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -151,12 +210,25 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
                 <input
                   id="login-password"
                   type="password"
-                  autoComplete="current-password"
+                  autoComplete={needsSetup ? "new-password" : "current-password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
               </div>
+              {needsSetup && (
+                <div>
+                  <label htmlFor="setup-confirm" style={labelStyle}>Konfirmasi password</label>
+                  <input
+                    id="setup-confirm"
+                    type="password"
+                    autoComplete="new-password"
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
 
               {error && (
                 <div
@@ -175,14 +247,12 @@ export function LoginGate({ children }: { children: React.ReactNode }) {
               )}
 
               <Button type="submit" variant="primary" disabled={submitting} style={{ width: "100%", height: 40 }}>
-                {submitting ? "Memeriksa…" : "Masuk"}
+                {submitting ? "Memproses…" : needsSetup ? "Buat akun & mulai" : "Masuk"}
               </Button>
             </form>
 
-            <div style={{ fontSize: 11.5, color: "var(--muted-foreground)", marginTop: 18, lineHeight: 1.7 }}>
-              Kredensial diatur lewat environment variable
-              <br />
-              <code style={{ fontSize: 11 }}>OWNER_USERNAME</code> dan <code style={{ fontSize: 11 }}>OWNER_PASSWORD</code>.
+            <div style={{ fontSize: 11.5, color: "var(--muted-foreground)", marginTop: 18, lineHeight: 1.7, textAlign: "center" }}>
+              Template KostKu · dibuat oleh Ammar
             </div>
           </div>
         </main>

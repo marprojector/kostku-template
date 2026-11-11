@@ -220,7 +220,7 @@ function JatuhTempoCard({ data, onOpenPenyewa }: { data: DashboardStats; onOpenP
 }
 
 /* ---------- Halaman Modern Dashboard ---------- */
-export function ModernDashboard({ onSelectPenyewa, identitas }: { onSelectPenyewa?: (id: number) => void; identitas: Identitas } = { onSelectPenyewa: undefined, identitas: { namaKos: "Kos Perajin", alamat: "", namaPemilik: "Ammar" } }) {
+export function ModernDashboard({ onSelectPenyewa, identitas }: { onSelectPenyewa?: (id: number) => void; identitas: Identitas } = { onSelectPenyewa: undefined, identitas: { namaKos: "KostKu", alamat: "", namaPemilik: "" } }) {
   const { data, loading, error, reload } = useApi<DashboardStats>(() => fetchDashboard());
 
   if (loading) {

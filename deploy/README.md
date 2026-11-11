@@ -4,7 +4,7 @@
 
 ```bash
 cp .env.production.example .env.production
-# edit .env.production: AUTH_SECRET, OWNER_USERNAME, OWNER_PASSWORD
+# edit .env.production: AUTH_SECRET (owner dibuat lewat registrasi saat pertama dibuka)
 chmod 600 .env.production
 openssl rand -base64 32
 
@@ -12,6 +12,8 @@ docker compose up -d --build
 docker compose ps
 curl -i http://127.0.0.1:3000/api/auth/me
 ```
+
+Setelah aplikasi hidup, buka domain melalui reverse proxy dan daftarkan akun owner pertama. Registrasi otomatis tertutup setelah akun pertama dibuat.
 
 The health check expects `401` from `/api/auth/me` without a cookie. Put a TLS reverse proxy in front of the localhost-bound port. Never publish the app port directly.
 
@@ -32,6 +34,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now kostku
 sudo systemctl status kostku
 ```
+
+Setelah service hidup, buka aplikasi dan daftarkan akun owner pertama. Registrasi otomatis tertutup setelah owner dibuat.
 
 ## Scheduled backup
 

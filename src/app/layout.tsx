@@ -13,8 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KostKu — Kos Perajin",
-  description: "Dashboard manajemen kamar, penyewa, tagihan, dan keuangan Kos Perajin.",
+  title: "KostKu — Manajemen Kos",
+  description: "Template dashboard manajemen kamar, penyewa, tagihan, dan keuangan kos.",
+  authors: [{ name: "Ammar" }],
+  creator: "Ammar",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

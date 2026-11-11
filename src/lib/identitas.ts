@@ -9,9 +9,9 @@ export interface Identitas {
 }
 
 export const DEFAULT_IDENTITAS: Identitas = {
-  namaKos: "KostKu - Ammar",
+  namaKos: "KostKu",
   alamat: "",
-  namaPemilik: "Ammar",
+  namaPemilik: "",
 };
 
 const EVENT = "kostku:identitas-changed";
