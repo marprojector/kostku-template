@@ -680,6 +680,14 @@ div[style*="overflowX: auto"] {
   min-height: calc(100vh - 8px - 56px - 16px);
 }
 
+/* Padding kartu dasar; bisa dioverride inline oleh pemanggil */
+.kostku-card {
+  padding: 20px;
+}
+.kostku-stat {
+  padding: 16px 18px;
+}
+
 /* ---------- Room map ---------- */
 .room-grid {
   display: grid;
@@ -820,20 +828,6 @@ div[style*="overflowX: auto"] {
     border-left: 1px solid var(--border);
   }
   .dashboard-kpi-strip > div > div:nth-child(n+3) {
-    border-bottom: none;
-  }
-}
-@media (max-width: 480px) {
-  .dashboard-kpi-strip > div {
-    grid-template-columns: 1fr !important;
-  }
-  .dashboard-kpi-strip > div > div {
-    border-left: none !important;
-  }
-  .dashboard-kpi-strip > div > div:nth-child(n+3) {
-    border-bottom: 1px solid var(--border);
-  }
-  .dashboard-kpi-strip > div > div:last-child {
     border-bottom: none;
   }
 }
@@ -1028,6 +1022,35 @@ div[style*="overflowX: auto"] {
     padding: 14px 12px 84px;
     padding-left: max(12px, env(safe-area-inset-left));
     padding-right: max(12px, env(safe-area-inset-right));
+  }
+  .kostku-card {
+    padding: 14px;
+  }
+  .kostku-stat {
+    padding: 12px 14px;
+  }
+  .kostku-pageheader {
+    margin-bottom: 14px !important;
+  }
+  .grid-2 {
+    gap: 12px !important;
+  }
+  /* KPI Menu Utama: tetap 2 kolom di ponsel */
+  .dashboard-kpi-strip > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  .dashboard-kpi-strip > div > div {
+    padding: 12px 12px !important;
+  }
+  .dashboard-kpi-strip > div > div > div:first-child {
+    font-size: 11.5px !important;
+  }
+  .dashboard-kpi-strip > div > div > div:nth-child(2) {
+    font-size: 19px !important;
+  }
+  .dashboard-kpi-strip > div > div > div:nth-child(3) {
+    font-size: 11px !important;
+    margin-top: 2px !important;
   }
   .kostku-header {
     padding-left: max(12px, env(safe-area-inset-left)) !important;

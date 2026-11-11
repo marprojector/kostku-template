@@ -21,10 +21,10 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-[var(--shadcn-border)] bg-[var(--card)] text-[var(--card-foreground)] shadow-none",
+        "kostku-card rounded-xl border border-[var(--shadcn-border)] bg-[var(--card)] text-[var(--card-foreground)] shadow-none",
         className
       )}
-      style={{ padding: "20px", ...style }}
+      style={style}
     >
       {children}
     </div>
@@ -53,6 +53,7 @@ export function PageHeader({
 }) {
   return (
     <div
+      className="kostku-pageheader"
       style={{
         display: "flex",
         alignItems: "flex-start",
@@ -208,7 +209,7 @@ export function Stat({
     isGood === null ? "var(--muted-foreground)" : isGood ? "var(--success)" : "var(--danger)";
 
   return (
-    <Card style={{ padding: "16px 18px", height: "100%" }}>
+    <Card className="kostku-stat" style={{ height: "100%" }}>
       <div style={{ fontSize: 12.5, color: "var(--muted-foreground)" }}>{label}</div>
       <div className="tnum" style={{ fontFamily: "var(--font-display)", fontSize: 24, fontWeight: 600, lineHeight: 1.2, marginTop: 8, letterSpacing: "-0.02em", color: "var(--foreground)" }}>
         {value}

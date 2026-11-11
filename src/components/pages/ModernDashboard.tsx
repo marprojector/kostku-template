@@ -80,10 +80,10 @@ function StatCard({ def, index }: { def: StatDef; index: number }) {
       transition={{ duration: 0.35, delay: index * 0.06, ease: [0.2, 0, 0, 1] }}
     >
       <Card className="h-full">
-        <CardContent className="flex flex-col gap-2 p-4">
-          <div className="text-xs text-[var(--muted-foreground)]">{def.label}</div>
-          <div className="text-2xl font-semibold tracking-tight tnum text-[var(--foreground)]">{def.value}</div>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted-foreground)]">
+        <CardContent className="flex flex-col gap-1.5 p-3 sm:p-4">
+          <div className="text-[11px] leading-tight text-[var(--muted-foreground)] sm:text-xs">{def.label}</div>
+          <div className="text-xl font-semibold tracking-tight tnum text-[var(--foreground)] sm:text-2xl">{def.value}</div>
+          <div className="flex flex-wrap items-center gap-2 text-[11px] text-[var(--muted-foreground)] sm:text-xs">
             <span>{def.sub}</span>
             {def.delta !== undefined && (
               <span className={cn("font-semibold", up ? "text-[var(--success)]" : "text-[var(--danger)]")}>
@@ -227,7 +227,7 @@ export function ModernDashboard({ onSelectPenyewa, identitas }: { onSelectPenyew
     return (
       <div className="grid grid-cols-12 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="col-span-12 sm:col-span-6 lg:col-span-3 h-[140px] animate-pulse rounded-lg bg-[var(--muted)]" />
+          <div key={i} className="col-span-6 lg:col-span-3 h-[120px] animate-pulse rounded-lg bg-[var(--muted)] sm:h-[140px]" />
         ))}
         <div className="col-span-12 h-[360px] animate-pulse rounded-lg bg-[var(--muted)]" />
       </div>
@@ -280,7 +280,7 @@ export function ModernDashboard({ onSelectPenyewa, identitas }: { onSelectPenyew
       {/* KPI row */}
       <div className="grid grid-cols-12 gap-4">
         {stats.map((def, i) => (
-          <div key={def.label} className="col-span-12 sm:col-span-6 lg:col-span-3">
+          <div key={def.label} className="col-span-6 lg:col-span-3">
             <StatCard def={def} index={i} />
           </div>
         ))}
