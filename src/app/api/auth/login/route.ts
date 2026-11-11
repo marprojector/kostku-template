@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Konfigurasi server tidak lengkap" }, { status: 503 });
   }
 
-  const limited = rateLimit(req);
+  const limited = rateLimit(req, 10);
   if (limited) return limited;
 
   const contentError = requireJson(req);

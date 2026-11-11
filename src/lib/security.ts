@@ -19,7 +19,7 @@ function clientIp(req: NextRequest): string {
   );
 }
 
-export function rateLimit(req: NextRequest): NextResponse | null {
+export function rateLimit(req: NextRequest, maxRequests: number = MAX_REQUESTS): NextResponse | null {
   const ip = clientIp(req);
   const endpoint = req.nextUrl.pathname;
   const key = `${ip}|${endpoint}`;
@@ -31,7 +31,7 @@ export function rateLimit(req: NextRequest): NextResponse | null {
     return null;
   }
 
-  if (record.count >= MAX_REQUESTS) {
+  if (record.count >= maxRequests) {
     return NextResponse.json(
       { error: "Terlalu banyak permintaan, coba beberapa saat lagi" },
       { status: 429, headers: { "Retry-After": "60" } }
