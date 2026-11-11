@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/ui";
 import { fetchTagihan, formatRupiah, waLink, generateTagihan, bayarTagihan, bayarSemuaTagihan, type TagihanDetail } from "@/lib/api";
-import { BULAN_ID, labelJatuhTempo, selisihHari, tanggalPendek } from "@/lib/format";
+import { BULAN_ID, labelStatusTagihan, selisihHari, tanggalPendek } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 import { useBulanIni } from "@/lib/useNow";
 
@@ -200,13 +200,13 @@ export function Tagihan() {
                       </td>
                       <td>{tanggalPendek(t.jatuhTempo)}</td>
                       <td>
-                        <Badge tone={tone}>{lunas ? "Lunas" : labelJatuhTempo(hari)}</Badge>
+                        <Badge tone={tone}>{labelStatusTagihan(lunas, hari)}</Badge>
                       </td>
                       <td style={{ textAlign: "right" }}>
                         <div style={{ display: "inline-flex", gap: 6 }}>
                           {!lunas && (
                             <Button size="sm" variant="success" onClick={() => handleBayar(t.id)} disabled={busy === t.id}>
-                              {busy === t.id ? "..." : "Lunas"}
+                              {busy === t.id ? "..." : "Tandai Lunas"}
                             </Button>
                           )}
                           <a href={waLink(t.no_wa, pesan)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>

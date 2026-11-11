@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, SectionTitle, Skeleton } from "@/components/ui";
 import { bayarTagihan, fetchKontrak, fetchTagihan, formatRupiah, waLink, type TagihanDetail } from "@/lib/api";
-import { labelJatuhTempo, selisihHari, tanggalPendek } from "@/lib/format";
+import { labelStatusTagihan, selisihHari, tanggalPendek } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 import { useState } from "react";
 
@@ -91,10 +91,10 @@ export function Tunggakan() {
                     <div className="tnum" style={{ fontSize: 14, fontWeight: 700 }}>
                       {formatRupiah(t.nominal)}
                     </div>
-                    <Badge tone="danger">{labelJatuhTempo(-hari)}</Badge>
+                    <Badge tone="danger">{labelStatusTagihan(false, selisihHari(t.jatuhTempo))}</Badge>
                   </div>
                   <Button size="sm" variant="success" onClick={() => handleBayar(t.id)} disabled={busy === t.id}>
-                    {busy === t.id ? "..." : "Lunas"}
+                    {busy === t.id ? "..." : "Tandai Lunas"}
                   </Button>
                   <a href={waLink(t.no_wa, pesan)} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
                     <Button size="sm" variant="secondary">WA</Button>
@@ -107,7 +107,7 @@ export function Tunggakan() {
       </Card>
 
       <Card style={{ marginBottom: 16 }}>
-        <SectionTitle sub="Belum jatuh tempo">Akan Jatuh Tempo</SectionTitle>
+        <SectionTitle sub="Belum lunas, belum lewat jatuh tempo">Akan Jatuh Tempo</SectionTitle>
         {akanJatuhTempo.length === 0 ? (
           <EmptyState>Tidak ada tagihan yang akan jatuh tempo</EmptyState>
         ) : (
@@ -136,7 +136,7 @@ export function Tunggakan() {
                   {formatRupiah(t.nominal)}
                 </div>
                 <Badge tone={selisihHari(t.jatuhTempo) <= 3 ? "warning" : "neutral"}>
-                  {labelJatuhTempo(selisihHari(t.jatuhTempo))}
+                  {labelStatusTagihan(false, selisihHari(t.jatuhTempo))}
                 </Badge>
               </div>
             </div>

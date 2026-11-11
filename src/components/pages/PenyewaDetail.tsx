@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Badge, Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/ui";
 import { fetchPenyewaProfil, formatRupiah, waLink, perpanjangKontrak, updatePenyewa, checkoutKontrak, type PenyewaProfil } from "@/lib/api";
-import { selisihHari, tanggalPendek, tampilWa } from "@/lib/format";
+import { labelStatusTagihan, selisihHari, tanggalPendek, tampilWa } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 
 interface Props {
@@ -374,7 +374,7 @@ export function PenyewaDetail({ penyewaId, onBack }: Props) {
                     <td style={{ fontWeight: 600 }}>{t.periode as string}</td>
                     <td className="tnum" style={{ textAlign: "right" }}>{formatRupiah(t.nominal as number)}</td>
                     <td>{tanggalPendek(t.jatuh_tempo as string)}</td>
-                    <td><Badge tone={tone}>{lunas ? "Lunas" : `Lewat ${Math.abs(hari)} hari`}</Badge></td>
+                    <td><Badge tone={tone}>{labelStatusTagihan(lunas, hari)}</Badge></td>
                   </tr>
                 );
               })}

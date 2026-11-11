@@ -47,6 +47,14 @@ export function labelJatuhTempo(hari: number): string {
   return `Lewat ${Math.abs(hari)} hari`;
 }
 
+/** Label status tagihan yang konsisten di semua halaman. */
+export function labelStatusTagihan(lunas: boolean, hari: number): string {
+  if (lunas) return "Lunas";
+  if (hari < 0) return `Nunggak · lewat ${Math.abs(hari)} hari`;
+  if (hari === 0) return "Belum lunas · jatuh tempo hari ini";
+  return `Belum lunas · ${hari} hari lagi`;
+}
+
 /** Normalisasi nomor WhatsApp: terima 08… atau 62…, hasil selalu 62… untuk wa.me */
 export function normalisasiWa(input: string): string {
   const digits = input.replace(/\D/g, "");

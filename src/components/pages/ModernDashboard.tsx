@@ -24,7 +24,7 @@ import { Button, Badge, Card, CardContent, CardHeader, CardTitle, CardDescriptio
 import { CountUp } from "@/components/fx";
 import { fetchDashboard, formatRupiah, type DashboardStats } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
-import { BULAN_ID, HARI_ID, formatRupiahShort } from "@/lib/format";
+import { BULAN_ID, HARI_ID, formatRupiahShort, labelStatusTagihan, selisihHari } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Identitas } from "@/lib/identitas";
 
@@ -201,7 +201,7 @@ function JatuhTempoCard({ data, onOpenPenyewa }: { data: DashboardStats; onOpenP
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
                       <span className="text-sm font-semibold tnum text-[var(--foreground)] whitespace-nowrap">{formatRupiah(t.nominal)}</span>
-                      <Badge variant={telat ? "destructive" : "secondary"}>{telat ? "Lewat" : "Segera"}</Badge>
+                      <Badge variant={telat ? "destructive" : "secondary"}>{labelStatusTagihan(false, selisihHari(t.jatuhTempo))}</Badge>
                     </div>
                   </button>
                 );

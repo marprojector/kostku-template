@@ -3,7 +3,7 @@
 import { Badge, Button, Card, EmptyState, PageHeader, SectionTitle, Skeleton } from "@/components/ui";
 import { CountUp } from "@/components/fx";
 import { fetchDashboard, formatRupiah, waLink, bayarTagihan, type DashboardStats } from "@/lib/api";
-import { BULAN_ID, formatRupiahShort, labelJatuhTempo, selisihHari, tanggalPendek } from "@/lib/format";
+import { BULAN_ID, formatRupiahShort, labelStatusTagihan, selisihHari, tanggalPendek } from "@/lib/format";
 import { useApi } from "@/lib/useApi";
 import { useState } from "react";
 
@@ -36,7 +36,7 @@ function RoomMap({
       <div style={{ display: "flex", gap: 6, marginBottom: 14, flexWrap: "wrap" }}>
         {[
           { label: `${nunggak} nunggak`, count: nunggak, bg: "var(--danger-bg)", color: "var(--danger)" },
-          { label: `${belumTempo} belum tempo`, count: belumTempo, bg: "var(--warning-bg)", color: "var(--warning)" },
+          { label: `${belumTempo} belum lunas`, count: belumTempo, bg: "var(--warning-bg)", color: "var(--warning)" },
           { label: `${aman} lunas`, count: aman, bg: "var(--success-bg)", color: "var(--success)" },
           { label: `${kosong} kosong`, count: kosong, bg: "var(--surface-2)", color: "var(--muted-foreground)" },
         ].map((chip) => (
@@ -125,7 +125,7 @@ function RoomMap({
                             : "var(--warning)",
                   }}
                 >
-                  {sel.status !== "terisi" ? "Tersedia" : sel.tagihanStatus === "lunas" ? "Lunas" : sel.tagihanStatus === "telat" ? "Nunggak" : "Belum Bayar"}
+                  {sel.status !== "terisi" ? "Tersedia" : sel.tagihanStatus === "lunas" ? "Lunas" : sel.tagihanStatus === "telat" ? "Nunggak" : "Belum lunas"}
                 </span>
               </div>
               <div style={{ fontSize: 13, color: "var(--muted-foreground)", marginTop: 4 }}>
@@ -346,7 +346,7 @@ export function Dashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: number) 
                       <div className="tnum" style={{ fontSize: 13.5, fontWeight: 700 }}>
                         {formatRupiah(t.nominal)}
                       </div>
-                      <Badge tone={tone}>{labelJatuhTempo(hari)}</Badge>
+                      <Badge tone={tone}>{labelStatusTagihan(false, hari)}</Badge>
                     </div>
                   </div>
                 );
@@ -358,7 +358,7 @@ export function Dashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: number) 
         <Card>
           <SectionTitle sub="Sudah melewati tanggal jatuh tempo">Tunggakan</SectionTitle>
           {data.lewat.length === 0 ? (
-            <EmptyState>Semua tagihan lunas</EmptyState>
+            <EmptyState>Tidak ada tunggakan — belum ada tagihan yang lewat jatuh tempo</EmptyState>
           ) : (
             <div>
               {data.lewat.map((t) => {
@@ -380,7 +380,7 @@ export function Dashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: number) 
                       <div style={{ fontSize: 13.5, fontWeight: 600 }}>
                         {t.nama_penyewa} — {t.kamar_nomor}
                       </div>
-                      <Badge tone="danger">Lewat {Math.abs(hari)} hari</Badge>
+                      <Badge tone="danger">{labelStatusTagihan(false, hari)}</Badge>
                     </div>
                     <div style={{ textAlign: "right", flexShrink: 0 }}>
                       <div className="tnum" style={{ fontSize: 13.5, fontWeight: 700 }}>
@@ -388,7 +388,7 @@ export function Dashboard({ onSelectPenyewa }: { onSelectPenyewa?: (id: number) 
                       </div>
                       <div style={{ display: "flex", gap: 6, marginTop: 4, justifyContent: "flex-end" }}>
                         <Button size="sm" variant="success" onClick={() => handleBayar(t.id)} disabled={busy === t.id}>
-                          {busy === t.id ? "..." : "Lunas"}
+                          {busy === t.id ? "..." : "Tandai Lunas"}
                         </Button>
                         <a
                           href={waLink(t.no_wa, pesan)}

@@ -25,15 +25,15 @@ export async function GET(req: NextRequest) {
     SELECT k.id, k.nomor, k.status, k.harga_sewa, p.nama as penyewa, p.id as penyewa_id,
            (SELECT t.id FROM tagihan t
             JOIN kontrak_sewa ks2 ON ks2.id = t.kontrak_id
-            WHERE ks2.kamar_id = k.id AND t.status = 'belum_lunas' AND t.jatuh_tempo <= ?
+            WHERE ks2.kamar_id = k.id AND ks2.status = 'aktif' AND t.status = 'belum_lunas' AND t.jatuh_tempo <= ?
             ORDER BY t.jatuh_tempo ASC LIMIT 1) as telat_id,
            (SELECT t.id FROM tagihan t
             JOIN kontrak_sewa ks2 ON ks2.id = t.kontrak_id
-            WHERE ks2.kamar_id = k.id AND t.periode = ?
+            WHERE ks2.kamar_id = k.id AND ks2.status = 'aktif' AND t.periode = ?
             ORDER BY t.id DESC LIMIT 1) as tagihan_id,
            (SELECT t.status FROM tagihan t
             JOIN kontrak_sewa ks2 ON ks2.id = t.kontrak_id
-            WHERE ks2.kamar_id = k.id AND t.periode = ?
+            WHERE ks2.kamar_id = k.id AND ks2.status = 'aktif' AND t.periode = ?
             ORDER BY t.id DESC LIMIT 1) as tagihan_status
     FROM kamar k
     LEFT JOIN kontrak_sewa ks ON ks.kamar_id = k.id AND ks.status = 'aktif'
@@ -43,10 +43,12 @@ export async function GET(req: NextRequest) {
   const totalKamar = db.prepare("SELECT COUNT(*) as c FROM kamar").get() as { c: number };
   const kamarTerisi = db.prepare("SELECT COUNT(*) as c FROM kamar WHERE status = 'terisi'").get() as { c: number };
 
-  // Tagihan belum lunas
-  const belumLunas = db.prepare("SELECT COUNT(*) as c FROM tagihan WHERE status = 'belum_lunas'").get() as { c: number };
+  // Tagihan belum lunas (hanya kontrak aktif, sama seperti halaman Tagihan)
+  const belumLunas = db.prepare(
+    "SELECT COUNT(*) as c FROM tagihan t JOIN kontrak_sewa ks ON ks.id = t.kontrak_id WHERE t.status = 'belum_lunas' AND ks.status = 'aktif'"
+  ).get() as { c: number };
   const totalTagihan = db.prepare(
-    "SELECT COALESCE(SUM(nominal), 0) as total FROM tagihan WHERE status = 'belum_lunas'"
+    "SELECT COALESCE(SUM(t.nominal), 0) as total FROM tagihan t JOIN kontrak_sewa ks ON ks.id = t.kontrak_id WHERE t.status = 'belum_lunas' AND ks.status = 'aktif'"
   ).get() as { total: number };
 
   // Hitung jatuh tempo 30 hari ke depan
@@ -57,7 +59,7 @@ export async function GET(req: NextRequest) {
     JOIN penyewa p ON p.id = ks.penyewa_id
     JOIN kamar k ON k.id = ks.kamar_id
     WHERE date(t.jatuh_tempo) >= date(?) AND date(t.jatuh_tempo) <= date(?, '+30 days')
-    AND t.status = 'belum_lunas'
+    AND t.status = 'belum_lunas' AND ks.status = 'aktif'
     ORDER BY t.jatuh_tempo ASC
     LIMIT 10
   `).all(now, now) as Array<Record<string, unknown>>;
@@ -69,7 +71,7 @@ export async function GET(req: NextRequest) {
     JOIN kontrak_sewa ks ON ks.id = t.kontrak_id
     JOIN penyewa p ON p.id = ks.penyewa_id
     JOIN kamar k ON k.id = ks.kamar_id
-    WHERE date(t.jatuh_tempo) < date(?) AND t.status = 'belum_lunas'
+    WHERE date(t.jatuh_tempo) < date(?) AND t.status = 'belum_lunas' AND ks.status = 'aktif'
     ORDER BY t.jatuh_tempo ASC
   `).all(now) as Array<Record<string, unknown>>;
 
