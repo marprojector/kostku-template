@@ -35,7 +35,13 @@ npm run dev
 
 Buka `http://localhost:3000`. Karena database masih kosong, halaman menampilkan **registrasi owner pertama**. Isi nama pemilik, nama kos, email, dan password. Setelah akun pertama dibuat, registrasi otomatis ditutup dan halaman berubah menjadi login.
 
-Database default: `./kostku.db` (bisa diubah lewat `KOSTKU_DB_PATH`).
+Database default: `./kostku.db` (bisa diubah lewat `KOSTKU_DB_PATH`). Registrasi owner pertama hanya muncul jika tabel `users` masih kosong.
+
+> Jika Anda menjalankan template di folder yang sebelumnya berisi `kostku.db` dari versi lain, data lama akan ikut tampil. Untuk mulai benar-benar kosong, gunakan database baru:
+>
+> ```bash
+> KOSTKU_DB_PATH=/tmp/kostku-template.db npm run dev
+> ```
 
 Ingin data contoh (6 kamar + beberapa transaksi)? Set `SEED_DATABASE=true` sebelum pertama kali menjalankan aplikasi.
 
