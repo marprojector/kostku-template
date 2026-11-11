@@ -1,4 +1,4 @@
-import { test, expect } from 'node:test';
+import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { hitungJatuhTempo } from '../src/lib/tagihan';
 
